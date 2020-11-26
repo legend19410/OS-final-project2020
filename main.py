@@ -40,7 +40,7 @@ class OS:
 
 
     def drawAllProcesses(self):
-        """draw all processes on the screen"""
+        """draw all processes in process list on the screen"""
         for process in self.processList:
             process.draw(self.window)
 
@@ -58,7 +58,7 @@ class OS:
     def moveProcesses(self):
         """iterate over all processes in the process list to determine if they can move"""
         for i, proc in enumerate(self.processList):
-            if proc.end_x() > self.CPU.x_pos + 60:  # this stops the process from moving pass the cpu
+            if proc.center_x() >= self.CPU.center_x():  # this stops the process from moving pass the cpu
                 continue                            # once pass cpu start pos + the diameter of the process
                                                     # then never move that process again.
             if proc.end_x() == self.queue.end_x():  # if process at the front of the queue
@@ -80,7 +80,7 @@ class Queue():
         self.queue = []
         self.color = (255, 0, 0)  # red color
         self.x_pos = 300
-        self.y_pos = 40
+        self.y_pos = 70
         self.width = 420
         self.height = 60
         self.font = pygame.font.SysFont(None, 30)
@@ -102,6 +102,9 @@ class Queue():
 
     def end_x(self):
         return self.x_pos + self.width
+    
+    def center_y(self):
+        return self.y_pos + self.height//2
 
 
 class Table:
@@ -158,25 +161,37 @@ class Table:
 class CPU:
 
     def __init__(self):
+
+        self.color = (0, 0, 255)                               #blue color
+        self.label_x_pos = 875                                 #label surface x pos
+        self.label_y_pos = 0                                   #label surface y pos
+        self.label_font = pygame.font.SysFont(None, 30)
+        self.label_width, self.label_height = self.label_font.size("CPU")      #label surface width
+
         self.currentProcess = None
-        self.color = (255, 255, 255)  # red color
-        self.x_pos = 840
-        self.y_pos = 0
-        self.width = 120
-        self.height = 400
-        self.font = pygame.font.SysFont(None, 30)
+        self.x_pos = 825                                            #x_pos of cpu image
+        self.y_pos = self.label_y_pos+\
+                     self.label_height+5                       #y pos pf cpu image
         self.cpu_image = pygame.image.load('cpu.jpg')
+        self.width = 150                                            #width of cpu image
+        self.height = 153                                           #height of cpu image
 
     def draw(self, window):
         """draw an outline of the cpu and make it invisible by making the color white
             Also draw the cpu image"""
-
-        pygame.draw.rect(window, self.color, pygame.Rect(self.x_pos, self.y_pos, self.width, self.height), 3)
-        txt = self.font.render("CPU", True, (0, 0, 255))
-        window.blit(txt, [self.x_pos + 35, self.y_pos + 200])
+            
+        #draw CPU label
+        # pygame.draw.rect(window, self.color, pygame.Rect(self.label_surf_x_pos, 
+        #                  self.label_surf_y_pos, self.label_surf_width, self.label_surf_height), 3)
+        txt = self.label_font.render("CPU", True, self.color)
+        window.blit(txt, [self.label_x_pos, self.label_y_pos])
 
         # draw cpu image
-        window.blit(self.cpu_image, (825, 0))
+        window.blit(self.cpu_image, (self.x_pos, self.y_pos))
+
+    
+    def center_x(self):
+        return self.x_pos + self.width//2
 
 
 class Process:
@@ -187,7 +202,7 @@ class Process:
         self.queue = queue
         self.color = (255, 0, 0) # red color
         self.x_pos = 30
-        self.y_pos = 70
+        self.y_pos = self.queue.center_y()
         self.radius = 30
         self.velocity = 30
         self.id = id
@@ -241,13 +256,16 @@ class Process:
             self.inCPU = False
 
     def end_x(self):
-        """get the starting x point of the process circle"""
+        """get the ending x point of the process circle"""
         return self.x_pos + self.radius
 
     def start_x(self):
-        """get the ending x point of the process circle"""
+        """get the starting x point of the process circle"""
         return self.x_pos - self.radius
 
+    def center_x(self):
+        """get x position of circle (center of circle)"""
+        return self.x_pos
 run = True
 
 def closeGameOnQuit():
@@ -261,6 +279,7 @@ if __name__ == '__main__':
 
     pygame.init()
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
     os = OS(window)
     while run:
         pygame.time.Clock().tick(5)  # frame rate 5 frames per second
