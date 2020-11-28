@@ -28,13 +28,15 @@ if __name__ == '__main__':
     pygame.display.set_icon(icon)
     pygame.display.set_caption("Scheduler Simulator")
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    window.fill((255, 255, 255))
 
-    fcfs = FCFS(window)
+    #fcfs = FCFS(window)
     rr = RR(window)
 
     while run:
         pygame.time.Clock().tick(5)  # frame rate 5 frames per second
         run = closeGameOnQuit()  # exit on click the quit button
-        fcfs.run()
+        #fcfs.run()
+        rr.run()
 
     pygame.quit()

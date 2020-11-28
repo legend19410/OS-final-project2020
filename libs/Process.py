@@ -1,73 +1,94 @@
 import pygame
+from libs.OsObj import OsObj
 
-class Process:
-
+class Process(OsObj):
     def __init__(self, CPU, queue, id, burstTime):
+        img = pygame.image.load("resources/images/exe.png")
+        img = pygame.transform.scale(img, (60, 60))
+        super().__init__(img, pygame.font.SysFont(None,30), (0, 0, 255))
+
+        self.setTopLeft(30, 70)
         self.CPU = CPU
         self.burstTime = burstTime
         self.queue = queue
-        self.color = (255, 0, 0) # red color
-        self.x_pos = 30
-        self.y_pos = 70
-        self.radius = 30
-        self.velocity = 30
+        self.stepSize = 30
         self.id = id
-        self.label = "P"+str(self.id)
+        self.label = self.font.render("P" + str(self.id), True, self.color)
         self.inQueue = False
         self.inCPU = False
-        self.font = pygame.font.SysFont(None,30)
-        self.process_image = pygame.image.load("resources/images/exe.png")
-        self.process_image = pygame.transform.scale(self.process_image, (60, 60))
 
     def draw(self, window):
-        """ Draw all processes on the screen along with there respective labels and time remaining on cpu """
+        """ Draw all processes on the screen along with their respective
+            labels and time remaining on cpu """
 
-        # Draw the circle that represents the process
-        #pygame.draw.circle(window, self.color , (self.x_pos, self.y_pos), self.radius)
-        window.blit(self.process_image, [self.x_pos - 30, self.y_pos - 30])
+        # Draw the image that represents the process
+        self.rect = window.blit(self.img, self.topLeft())
 
         # Draw the label on the process eg 'P1'
-        txt = self.font.render(self.label, True, (0,0,255))
-        window.blit(txt, [self.x_pos - 10,self.y_pos - 10])
+        #txt = self.font.render(self.label, True, self.color)
+        txt = self.label
+        window.blit(txt, self.computeTopLeft(self.center(), txt.get_size()))
 
-        # If the process is in the cpu draw the label just below the cpu otherwise draw it just below the process
+        # If the process is in the cpu draw the label just below the cpu
+        # otherwise draw it just below the process
         if self.inCPU:
-            txt = self.font.render(str(self.burstTime)+"ms", True, (0, 0, 255))
-            window.blit(txt, [self.x_pos - 25, self.y_pos + 85])
+            txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
+            window.blit(txt, self.computeTopLeft(self.center(), \
+                self.getDims(), 0, self.CPU.height()))
         else:
-            txt = self.font.render(str(self.burstTime) + "ms", True, (0, 0, 255))
-            window.blit(txt, [self.x_pos - 25, self.y_pos + 38])
+            txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
+            window.blit(txt, self.computeTopLeft(self.center(), \
+                self.getDims(), 0, self.height() + 5))
 
-    def move(self):
+    def advance(self):
         """ Move the process and make it aware if it is in the cpu or queue """
-        self.x_pos += self.velocity
-        self.setQueueParams()
 
-    def setQueueParams(self):
+        x, y = self.topLeft()
+        x += self.stepSize
+        self.setTopLeft(x, y)
+
+        self.isInQueue()
+        self.isInCPU()
+
+    def isInQueue(self):
         """ If process is within the bounds of the queue then set it as inQueue. if not
-            set inQueue to false and if it was marked as in the queue before, remove it.
-            Likewise if process is in the cpu set it as inCpu else set inCpu to false """
+            set inQueue to false and if it was marked as in the queue before, remove it. """
 
-        if (self.start_x() >= self.queue.x_pos) and (self.start_x() < self.queue.end_x()):
+        if (self.queue.rect.collidepoint(self.center())):
             self.inQueue = True
             self.queue.queue.append(self)
         else:
             self.inQueue = False
-            if self in self.queue.queue:
-                for i in range(len(self.queue.queue)):
-                    if i == self.id:
-                        del self.queue.queue[i]
+            self.queue.remove(self)
 
-        if (self.end_x() > self.CPU.x_pos) and (self.start_x() < self.CPU.x_pos+self.CPU.width):
+    def isInCPU(self):
+        """ If process is within the bounds of the CPU then set it as inCPU. if not
+            set inCPU to false """
+
+        if (self.CPU.rect.collidepoint(self.center())):
             self.inCPU = True
             self.CPU.currentProcess = self
+            
+            # Centers the process in the CPU
+            x, y = self.computeTopLeft(self.CPU.center(), self.getDims())
+            self.setTopLeft(x, y)
         else:
             self.inCPU = False
+            self.CPU.currentProcess = None
 
-    def end_x(self):
-        """ Get the starting x point of the process circle """
-        return self.x_pos + self.radius
+    def moveUp(self, wondow, stepSize):
+        self.setY(self.topY() - stepSize)
+        self.draw(window)
 
-    def start_x(self):
-        """ Get the ending x point of the process circle """
-        return self.x_pos - self.radius
+    def moveDown(self, wondow, stepSize):
+        self.setY(self.topY() + stepSize)
+        self.draw(window)
+
+    def moveLeft(self, wondow, stepSize):
+        self.setX(self.backX() - stepSize)
+        self.draw(window)
+
+    def moveRight(self, wondow, stepSize):
+        self.setX(self.backX() + stepSize)
+        self.draw(window)
+    
