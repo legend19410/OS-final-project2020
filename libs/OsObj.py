@@ -63,9 +63,7 @@ class OsObj:
     def setY(self, y):
         self.rect.y = y
 
-    def setTopLeft(self, x, y = 0):
-        if ((type(x) == tuple) or (type(x) == list)):
-            self.rect.topLeft = x
+    def setTopLeft(self, x, y):
         self.rect.topleft = (x,y)
 
     def setCenterX(self, x):
@@ -74,10 +72,8 @@ class OsObj:
     def setCenterY(self, y):
         self.rect.centery = y
 
-    def setCenter(self, x, y = 0):
-        if ((type(x) == tuple) or (type(x) == list)):
-            self.rect.center = x
-        self.rect.center = (x,y)
+    def setCenter(self, x, y):
+        self.rect.center = (x, y)
 
     def computeTopLeft(self, center, dimensions, xOff=0, yOff=0):
         """ Computes the top left corner relative to the center given """

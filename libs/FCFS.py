@@ -1,25 +1,19 @@
 import pygame
+
 from libs.CPU import CPU
 from libs.Process import Process
 from libs.Queue import Queue
 from libs.Table import Table
+from libs.Scheduler import Scheduler
 
-class FCFS:
+class FCFS(Scheduler):
     def __init__(self, window):
-        self.time = 1
-        self.CPU = CPU()
-        self.window = window
-        self.processes = [(1,5,33),(2,2,32),(3,3,44),(4,9,27),(5,10,58),\
-            (6,20,34),(7,30, 80)] #(process ID, arrival time, burst time)
-        self.queue = Queue()
+        super().__init__(window)
         self.processList = []       # store all created processes
         self.lock = False
-        self.table = Table(self.processes)
 
     def run(self):
-        self.queue.draw(self.window)
-        self.CPU.draw(self.window)
-        self.table.draw(self.window)
+        self.updateWindow()
 
         self.createProcess()
         self.drawAllProcesses()
@@ -48,10 +42,10 @@ class FCFS:
             cpu then decrease that process burst time until it becomes zero
             before removingthe process from the cpu and releasing the lock """
 
-        if self.lock and self.CPU.currentProcess:
-            self.CPU.currentProcess.burstTime -= 1
-            if self.CPU.currentProcess.burstTime == 0:
-                self.processList.remove(self.CPU.currentProcess)
+        if self.lock and self.CPU.getProcess():
+            self.CPU.getProcess().burstTime -= 1
+            if self.CPU.getProcess().burstTime == 0:
+                self.processList.remove(self.CPU.getProcess())
                 self.lock = False
 
     def moveProcesses(self):
