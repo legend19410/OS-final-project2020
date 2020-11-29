@@ -61,7 +61,7 @@ class Scheduler:
             self.processList.extend(new)
             self.state = "enqueue"
         except KeyError:
-            pass
+            return 0
 
     def waiting(self):
         """ Checks for newly arrived processes and increments the clock """

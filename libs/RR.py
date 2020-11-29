@@ -14,6 +14,8 @@ class RR(Scheduler):
         self.STATE_DICT.update({"enqueue": self.enqueue, \
             "requeue": self.requeue, \
             "execute": self.execute})
+        self.movingUp = False               #these are for the requeue functions
+        self.movingRight = False            #these are for the requeue functions
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
@@ -59,43 +61,53 @@ class RR(Scheduler):
         right = self.queue.getEndPtr()
 
         # Move the process down out of the CPU
-        if (p.topY() < down):
+        if ((p.topY() < down) and (not self.movingUp)):
             if (p.bottomY() >= self.CPU.bottomY()):
                 p.inCPU = False
             p.moveDown()
 
         # Move the process to the left after it has been removed from the queue
-        if (p.topY() >= down):
+        if ((p.topY() >= down) and (not self.movingUp)):
             if (p.backX() > left):
                 p.moveLeft()
 
         # Move process up inline with queue after moving it behind the queue
-        print("left: " + str(p.backX() <= left))
-        if (p.backX() <= left):
+        # print("left: " + str(p.backX() <= left))
+        if ((p.backX() <= left) and (not self.movingRight)):
+            self.movingUp=True
             dist = p.topY() - up
 
-            print("p: " + str(p) + " " + str(self.CPU.getProcess()))
-            print("p in processList: " + str(p in self.processList))
-            print("step check: " + str(dist > p.stepSize))
+            # print("p: " + str(p) + " " + str(self.CPU.getProcess()))
+            # print("p in processList: " + str(p in self.processList))
+            # print("step check: " + str(dist > p.stepSize))
             if (dist > p.stepSize):
                 print("Moving...")
                 p.moveUp()
                 print("Moved")
             else:
-                print("Moving 2")
+                # print("Moving 2")
                 p.moveUp(dist)
-                print("Moved 2")
+                # print("Moved 2")
 
         # Enqueue the process
-        print("top: " + str(p.topY() == up))
+        # print("top process:",p.topY(), "      top q:", up)
+        # print("top: " + str(p.topY() == up))
         if (p.topY() == up):
+            # print("HEEEEE")
+            self.movingRight = True
             dist = right - p.frontX()
+            # print("Distance to next queue slot:", dist)
             if (dist > p.stepSize):
                 p.moveRight()
+                # print("moving right")
             else:
+                # print("moving right 2")
                 p.moveRight(dist)
                 self.queue.enqueue(p)
                 self.CPU.setProcess(None)
                 self.CPU.lock = False
+                self.movingRight = False
+                self.movingUp = False                
                 if (self.spawnProcess() == 0):
                     self.state = "dequeue"
+                    self.timeBeforeInterrupt = self.TIME_QUANTUM
