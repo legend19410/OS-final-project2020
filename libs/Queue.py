@@ -15,7 +15,7 @@ class Queue(OsObj):
         self.setCenterX(window.get_width()//2)
 
         # Draw the rectangle to hold 7 processes
-        self.rect = pygame.draw.rect(window, self.color, self.rect, 3)
+        pygame.draw.rect(window, self.color, self.rect,3)
 
         # Draw the vertical lines for each cell of the queue
         t = self.width()//self.cellWidth
@@ -37,14 +37,14 @@ class Queue(OsObj):
         """ Adds a process to the back of the queue """
         self.queue.append(process)
 
-    def dequeue(self, window, updateWindow):
+    def dequeue(self, window):
         """ Removes a process from the front of the queue and returns it.
             Returns None if queue is empty """
         try:
             for p in self.queue:
                 x, y = p.topLeft()
                 x += self.cellWidth
-                p.moveTo(window, (x, y), 30, updateWindow)
+                p.moveRight(self.cellWidth)
             return self.queue.pop(0)
         except IndexError:
             return None

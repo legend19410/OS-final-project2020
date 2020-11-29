@@ -18,11 +18,10 @@ class CPU(OsObj):
         topLeft = self.computeTopLeft(self.center(), txt.get_size())
         window.blit(txt, topLeft)
 
-    def execute(self, window, updateWindow):
+    def execute(self):
         """ Decrements the burst time. If the process finishes, \
             lock is set to False """
         self.lock = not self.currentProcess.execute()
-        self.currentProcess.draw(window, updateWindow)
 
     def getProcess(self):
         """ Returns the currently executing process """

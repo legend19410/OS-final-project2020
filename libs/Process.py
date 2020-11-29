@@ -2,16 +2,16 @@ import pygame
 from libs.OsObj import OsObj
 
 class Process(OsObj):
-    def __init__(self, ID, aTime, burstTime):
+    def __init__(self, ID, burstTime):
         img = pygame.image.load("resources/images/exe.png")
         img = pygame.transform.scale(img, (60, 60))
         super().__init__(img, pygame.font.SysFont(None,30), (0, 0, 255))
 
         self.id = ID
-        self.arrivalTime = aTime
         self.burstTime = burstTime
 
         self.setTopLeft(70, 40)
+        self.stepSize = 30
         self.inCPU = False
         self.label = self.font.render("P" + str(self.id), True, self.color)
     
@@ -20,12 +20,9 @@ class Process(OsObj):
         self.burstTime -= 1
         return self.burstTime == 0
 
-    def draw(self, window, updateWindow):
+    def draw(self, window):
         """ Draw all processes on the screen along with their respective
             labels and time remaining on cpu """
-
-        # Redraws all the other elements in the window
-        updateWindow()
 
         # Draw the image that represents the process
         self.rect = window.blit(self.img, self.topLeft())
@@ -39,26 +36,25 @@ class Process(OsObj):
         if self.inCPU:
             txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
             window.blit(txt, self.computeTopLeft(self.center(), \
-                self.getDims(), 0, 100))
+                self.getDims(), 0, 120))
         else:
             txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
             window.blit(txt, self.computeTopLeft(self.center(), \
-                self.getDims(), 0, 100))
-        pygame.display.update()
+                self.getDims(), 0, self.height() + 5))
 
-    def moveUp(self, stepSize):
+    def moveUp(self, stepSize=30):
         """ Moves the process up by the number of pixels specified """
         self.setY(self.topY() - stepSize)
 
-    def moveDown(self, stepSize):
+    def moveDown(self, stepSize=30):
         """ Moves the process down by the number of pixels specified """
         self.setY(self.topY() + stepSize)
 
-    def moveLeft(self, stepSize):
+    def moveLeft(self, stepSize=30):
         """ Moves the process left by the number of pixels specified """
         self.setX(self.backX() - stepSize)
 
-    def moveRight(self, stepSize):
+    def moveRight(self, stepSize=30):
         """ Moves the process right by the number of pixels specified """
         self.setX(self.backX() + stepSize)
 
@@ -123,6 +119,7 @@ class Process(OsObj):
             move["y"](stepSizeY)
             self.draw(window, updateWindow)
             numSteps -= 1
+            time.sleep(0.25)
         move["x"](lastStepX)
         move["y"](lastStepY)
         self.draw(window, updateWindow)

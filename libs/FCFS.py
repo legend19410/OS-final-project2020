@@ -9,7 +9,6 @@ from libs.Scheduler import Scheduler
 class FCFS(Scheduler):
     def __init__(self, window):
         super().__init__(window)
-        self.processList = []       # store all created processes
         self.lock = False
 
     def run(self):
