@@ -5,7 +5,6 @@ SCREEN_HEIGHT = 600
 
 
 class OS:
-
     def __init__(self, window):
         self.time = 1
         self.CPU = CPU()
@@ -22,29 +21,45 @@ class OS:
         self.CPU.draw(self.window)
         self.table.draw(self.window)
 
-        self.createProcess()
-        self.drawAllProcesses()
-        self.moveProcesses()
-        self.executeProcess()
+        self.shortestRemainingTime()
 
         pygame.display.update()
         self.window.fill((255, 255, 255))
         self.time += 0.25
 
-    def createProcess(self):
-        """check the arrival time of each process and create it if arrival time match current timeD"""
 
+    def shortestRemainingTime(self):
+        """check the arrival time of each process and create it if arrival time match current timeD"""
         for process in self.processes:
             if process[1] == self.time:
-                self.processList.append(Process(self.CPU, self.queue, process[0],process[2]))
+                self.processList.append(Process(self.CPU, self.queue, process[0], process[2]))
+                self.processList.sort(key=lambda process : process.burstTime)
+                
+                for i, process in enumerate(self.processList):
+                    process.x_pos = self.queue.end_x() - process.radius*(2*i) - process.radius
 
+        for i, proc in enumerate(self.processList):
+            if proc.end_x() > self.CPU.x_pos + 60:  # this stops the process from moving pass the cpu
+                continue                            # once pass cpu start pos + the diameter of the process
+                                                    # then never move that process again.
 
-    def drawAllProcesses(self):
+            if proc.end_x() == self.queue.end_x():  # if process at the front of the queue
+                if not self.lock:                   # if lock not on move process beyond front and set lock to true
+                    proc.moveToCPU()
+                    self.lock = True
+                else:
+                    pass                            # else dont move
+            
+                                                    # else process not at front of the queue; worry about process infront
+                                                    # this checks if there is a process directly infront. If not move
+            else:                                  
+                if not(self.processList[i-1].x_pos-self.processList[i-1].radius == proc.x_pos+proc.radius):
+                    proc.move()
+        
         """draw all processes on the screen"""
         for process in self.processList:
             process.draw(self.window)
 
-    def executeProcess(self):
         """if lock is true and there is a current process assigned to the cpu
             then decrease that process burst time until it becomes zero before removing
             the process from the cpu and releasing the lock"""
@@ -53,25 +68,8 @@ class OS:
             self.CPU.currentProcess.burstTime -= 1
             if self.CPU.currentProcess.burstTime == 0:
                 self.processList.remove(self.CPU.currentProcess)
+                self.CPU.currentProcess = None
                 self.lock = False
-
-    def moveProcesses(self):
-        """iterate over all processes in the process list to determine if they can move"""
-        for i, proc in enumerate(self.processList):
-            if proc.end_x() > self.CPU.x_pos + 60:  # this stops the process from moving pass the cpu
-                continue                            # once pass cpu start pos + the diameter of the process
-                                                    # then never move that process again.
-            if proc.end_x() == self.queue.end_x():  # if process at the front of the queue
-                if not self.lock:                   # if lock not on move process beyond front and set lock to true
-                    proc.move()
-                    self.lock = True
-                else:
-                    pass                           # else dont move
-            else:                                  # else process not at front of the queue; worry about process infront
-                                                   # this checks if there is a process directly infront. If not move
-                if not(self.processList[i-1].x_pos-self.processList[i-1].radius == proc.x_pos+proc.radius):
-                    proc.move()
-
 
 
 
@@ -156,7 +154,6 @@ class Table:
 
 
 class CPU:
-
     def __init__(self):
         self.currentProcess = None
         self.color = (255, 255, 255)  # red color
@@ -180,7 +177,6 @@ class CPU:
 
 
 class Process:
-
     def __init__(self, CPU, queue, id, burstTime):
         self.CPU = CPU
         self.burstTime = burstTime
@@ -219,6 +215,11 @@ class Process:
         self.x_pos += self.velocity
         self.setQueueParams()
 
+    def moveToCPU(self):
+        """move the process in the queue"""
+        self.x_pos += 120
+        self.setQueueParams()
+
     def setQueueParams(self):
         """if process is within the bounds of the queue then set it as inQueue. if not
             set inQueue to false and if it was marked as in the queue before, remove it.
@@ -247,6 +248,10 @@ class Process:
     def start_x(self):
         """get the ending x point of the process circle"""
         return self.x_pos - self.radius
+
+
+
+
 
 run = True
 
