@@ -15,6 +15,10 @@ class Process(OsObj):
         self.inCPU = False
         self.label = self.font.render("P" + str(self.id), True, self.txtColor)
     
+    def getBurstTime(self):
+        """returns the burst time of a process"""
+        return self.burstTime
+
     def execute(self):
         """ Decrements the burst time and returns True if process is complete """
         self.burstTime -= 1

@@ -5,7 +5,6 @@ class SPN(Scheduler):
             (3,3,44), (4,9,27), (5,10,58), (6,20,34), (7,30, 80)]):
         super().__init__(window, processes)
         self.STATE_DICT.update({"enqueue": self.enqueue, \
-            "swap": self.swap, \
             "execute": self.execute})
         self.target = None
         self.newProcess = None
@@ -27,55 +26,39 @@ class SPN(Scheduler):
                     self.queue.enqueue(p)
                     self.nextProcess += 1
                     self.newProcess = p
-                    self.state = "swap"
+                    self.state = "dequeue"
 
-    def swap(self):
-        """ Sorts the processes in the queue based on burst time """
+    def dequeue(self):
+        """ Removes a process from the queue and adds it to the CPU for execution """
 
-        p = self.newProcess
-
-        # Search for the appropriate spot for the newly added process
-        if (self.target == None):
-            self.target = 0
-            for q in self.queue.queue:
-                if (p.burstTime < q.burstTime):
-                    break
-                self.target += 1
-
-            # If process is in the right spot, proceed with simulation else reorder the queue
-            end = self.queue.getLen()
-            if (self.target == end):
-                self.target = None
-                self.state = "dequeue"
+        # If the CPU isn't busy send a process to be executed
+        if (self.CPU.lock):
+            self.state = "execute"
         else:
-            down = self.queue.bottomY() + 20
-            right = self.queue.frontX() - self.queue.cellWidth * self.target
-            up = self.queue.topY()
+            # Checks if cpu has been updated with the next process
+            p = self.CPU.getProcess()
 
-            # Moves the new process down below the queue
-            if ((p.topY() < down) and \
-                    (p.frontX() != right)):
-                p.moveDown()
+            if ((p == None) or (p.burstTime == 0)):
+                if (p != None):      # Catches case where a process arrives as the current one finishes
+                    self.processList.remove(self.CPU.getProcess())
+                    self.nextProcess -= 1
+                    self.finishedProcesses += 1
+                p = self.queue.dequeue(self.window, "spn")
+                if (p == None):     # Returns to waiting state if queue is empty
+                    self.state = "waiting"
+                    return None
+                self.CPU.setProcess(p)
 
-            # Moves the new process to the right until it is below the correct cell
-            # and shuffle other processes down by one cell
-            if ((p.topY() >= down) and \
-                    (p.frontX() < right)):
-                dist = right - p.frontX()
-                if (dist > p.stepSize):
-                    p.moveRight()
-                else:
-                    p.moveRight(dist)
-                    self.queue.shuffleFrom(self.target)
-
-            # Move the new process up into the new cell
-            if ((p.frontX() == right)):
-                dist = p.topY() - up
-                if (dist > p.stepSize):
-                    p.moveUp()
-                else:
-                    p.moveUp(dist)
-                    self.state = "enqueue"
+            dist = self.CPU.centerX() - p.centerX()
+            if (dist > p.stepSize):
+                if (dist <= (self.CPU.width() + p.width())//2):
+                    p.inCPU = True
+                p.moveRight()
+            else:
+                x, y = self.CPU.center()
+                p.setCenter(x, y)
+                self.CPU.lock = True
+                self.state = "execute"
 
     def execute(self):
         """ Executes the current process to completion before removing

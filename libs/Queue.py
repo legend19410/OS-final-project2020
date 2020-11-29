@@ -41,23 +41,27 @@ class Queue(OsObj):
         """ Adds a process to the back of the queue """
         self.queue.append(process)
 
-    def dequeue(self, window):
+    def dequeue(self, window, al=None):
         """ Removes a process from the front of the queue and returns it.
             Returns None if queue is empty """
-        try:
-            for p in self.queue:
-                p.moveRight(self.cellWidth)
+        try:            
+            if al=="spn" or al=="srt":
+                shortest_job = self.queue[0]
+                for p in self.queue[1:]:
+                    # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
+                    if p.getBurstTime() < shortest_job.getBurstTime():
+                        shortest_job = p
+                
+                index = self.queue.index(shortest_job)
+                self.queue.pop(index)
+                
+                for p in self.queue[index:]:
+                    p.moveRight(self.cellWidth)     
+                return shortest_job
+                
+            else:
+                for p in self.queue:
+                    p.moveRight(self.cellWidth)
             return self.queue.pop(0)
         except IndexError:
             return None
-
-    def shuffleFrom(self, index):
-        """ Removes the last process in the queue and places it at the
-            index given. Also shuffles down th processes down visually
-            leaving room for the end process to be moved in """
-
-        end = self.queue.pop(-1)
-        self.queue.insert(index, end)
-        for i in range(self.getLen()-1, index, -1):
-            p = self.queue[i]
-            p.moveLeft(self.cellWidth)
