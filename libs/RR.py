@@ -1,38 +1,19 @@
-import time
-import pygame
-
 from libs.CPU import CPU
 from libs.Process import Process
 from libs.Queue import Queue
 from libs.Table import Table
 from libs.Clock import Clock
-
 from libs.Scheduler import Scheduler
 
 class RR(Scheduler):
-    def __init__(self, window, mode="normal"):
-        super().__init__(window, mode)
+    def __init__(self, window, processes=[(1,5,33), (2,2,32), \
+            (3,3,44), (4,9,27), (5,10,58), (6,20,34), (7,30, 80)]):
+        super().__init__(window, processes)
         self.TIME_QUANTUM = 15
         self.timeBeforeInterrupt = self.TIME_QUANTUM
         self.STATE_DICT.update({"enqueue": self.enqueue, \
             "requeue": self.requeue, \
             "execute": self.execute})
-
-    def run(self):
-        """ Simulates scheduler using the processes given """
-
-        prevState = ""
-        # Run until all processes have been executed
-        while (self.finishedProcesses < self.numProcesses):
-            if (self.state != prevState):
-                print("State: " + self.state)
-                print("Time: " + str(self.clock.getTime()))
-                prevState = self.state
-
-            self.STATE_DICT[self.state]()
-            self.updateWindow()
-            self.closeGameOnQuit()
-            time.sleep(0.1)
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
@@ -56,6 +37,7 @@ class RR(Scheduler):
 
         if (not self.CPU.lock):                 # The process finished before the time slice
             self.processList.remove(self.CPU.getProcess())
+            self.nextProcess -= 1
             self.CPU.setProcess(None)
             self.finishedProcesses += 1
             self.state = "dequeue"
@@ -93,6 +75,7 @@ class RR(Scheduler):
             dist = p.topY() - up
 
             print("p: " + str(p) + " " + str(self.CPU.getProcess()))
+            print("p in processList: " + str(p in self.processList))
             print("step check: " + str(dist > p.stepSize))
             if (dist > p.stepSize):
                 print("Moving...")

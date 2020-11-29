@@ -1,4 +1,5 @@
 import pygame
+import time
 
 from libs.CPU import CPU
 from libs.Process import Process
@@ -7,10 +8,7 @@ from libs.Table import Table
 from libs.Clock import Clock
 
 class Scheduler:
-    def __init__(self, window, mode, processes=[(1,5,33), (2,2,32), \
-            (3,3,44), (4,9,27), (5,10,58), (6,20,34), (7,30, 80)]):
-        #(process ID, arrival time, burst time)
-
+    def __init__(self, window, processes):
         # Dictionary of processes indexed on arrival time
         self.processes = {}
         for id, arrivalTime, burstTime in processes:
@@ -23,7 +21,7 @@ class Scheduler:
         self.CPU = CPU()
         self.queue = Queue()
         self.table = Table(processes)
-        self.clock = Clock(mode)
+        self.clock = Clock()
         self.window = window
 
         self.nextProcess = 0
@@ -31,38 +29,34 @@ class Scheduler:
         self.processList = [] # Stores all active processes
         self.finishedProcesses = 0
 
+        self.mode = ""
+
         self.state = "waiting"
+        self.prevState = ""
         self.STATE_DICT = {"waiting": self.waiting, \
             "dequeue": self.dequeue, \
-            "enqueue": self.inValidState, \
-            "requeue": self.inValidState, \
-            "sort": self.inValidState, \
-            "execute": self.inValidState}
+            "enqueue": self.invalidState, \
+            "requeue": self.invalidState, \
+            "sort": self.invalidState, \
+            "execute": self.invalidState}
 
-    def closeGameOnQuit(self):
-        """ Manages closing of the simulator """
+    def run(self, mode="normal", speed=0.25):
+        """ Simulates scheduler using the processes given """
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
+        self.clock.setMode(mode)
+        self.updateWindow()
+        # Run until all processes have been executed
+        while (self.finishedProcesses < self.numProcesses):
+            self.stepModeWait()
+            self.STATE_DICT[self.state]()
+            self.updateWindow()
+            self.closeGameOnQuit()
+            time.sleep(speed)
 
-    def updateWindow(self):
-        """ Redraws all the elements on the screen and updates the display """
-
-        self.window.fill((255, 255, 255))
-        self.CPU.draw(self.window)
-        self.table.draw(self.window)
-        self.queue.draw(self.window)
-        self.clock.draw(self.window)
-        for p in self.processList:
-            p.draw(self.window)
-        pygame.display.update()
-    
     def spawnProcess(self):
         """ Spawns a newly arrived process. Sets state to enqueue if successful """
 
         try:
-            print(self.clock.getTime())
             new = self.processes[self.clock.getTime()]
             self.processList.extend(new)
             self.state = "enqueue"
@@ -83,7 +77,12 @@ class Scheduler:
         else:
             # Checks if cpu has been updated with the next process
             p = self.CPU.getProcess()
-            if (p == None):
+
+            if ((p == None) or (p.burstTime == 0)):
+                if (p != None):      # Catches case where a process arrives as the current one finishes
+                    self.processList.remove(self.CPU.getProcess())
+                    self.nextProcess -= 1
+                    self.finishedProcesses += 1
                 p = self.queue.dequeue(self.window)
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
@@ -101,7 +100,41 @@ class Scheduler:
                 self.CPU.lock = True
                 self.state = "execute"
 
-    def inValidState(self):
+    def closeGameOnQuit(self):
+        """ Manages closing of the simulator """
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+
+    def updateWindow(self):
+        """ Redraws all the elements on the screen and updates the display """
+
+        self.window.fill((255, 255, 255))
+        self.CPU.draw(self.window)
+        self.table.draw(self.window)
+        self.queue.draw(self.window)
+        self.clock.draw(self.window)
+        for p in self.processList:
+            p.draw(self.window)
+        pygame.display.update()
+    
+    def stepModeWait(self):
+        """ Waits on user input before changing state if in the scheduler is in 'step' mode """
+
+        if (self.clock.getMode() == "step"):
+            if (self.prevState != self.state):
+                print("State: " + self.state)
+                print("Time: " + str(self.clock.getTime()))
+            while (self.prevState != self.state):
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        exit()
+                    elif event.type == pygame.KEYDOWN:
+                        self.prevState = self.state
+                time.sleep(0.1)
+
+    def invalidState(self):
         """ Placeholder method """
         msg = "Plese reassign the method of this state...\n"
         msg += "Current State: " + self.state
