@@ -40,8 +40,8 @@ if __name__ == '__main__':
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     window.fill((255, 255, 255))
 
-    fcfs = FCFS(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
-            (5, 15, 15), (6, 20, 28), (7, 25, 30)])
+    # fcfs = FCFS(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
+            # (5, 15, 15), (6, 20, 28), (7, 25, 30)])
     rr = RR(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
             (5, 15, 15), (6, 20, 28), (7, 25, 30)])
     spn = SPN(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     while run:
         pygame.time.Clock().tick(5)  # frame rate 5 frames per second
         fcfs.run(mode, speed)
-        #rr.run(mode, speed)
+        rr.run(mode, speed)
         spn.run(mode, speed)
         run = closeGameOnQuit()  # exit on click the quit button
     pygame.quit()
