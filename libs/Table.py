@@ -18,40 +18,40 @@ class Table(OsObj):
         self.setY(height - self.height() - 10)
         
         # Draw the bounding rectangle
-        pygame.draw.rect(window, self.color, self.rect, 3)
+        pygame.draw.rect(window, self.bgColor, self.rect, 3)
 
         # Draw the three line for the columns
         t = self.width() // self.colWidth
         for i in range(1, t + 1):
-            pygame.draw.line(window, self.color, \
+            pygame.draw.line(window, self.bgColor, \
                 (self.backX() + (self.colWidth*i), self.topY()), \
                 (self.backX() + (self.colWidth*i), self.topY() + self.height()))
 
         # Draw the lines that separate the rows
         t = self.height() // self.rowHeight
         for i in range(1, t + 1):
-            pygame.draw.line(window, self.color, \
+            pygame.draw.line(window, self.bgColor, \
                 (self.backX(), self.topY() + (self.rowHeight*i)), \
                 (self.backX() + self.width(), self.topY() + (self.rowHeight*i)))
 
         # Draw the headings for the table
-        txt = self.font.render("PROCESSES", True, (0, 0, 255))
+        txt = self.font.render("PROCESSES", True, self.txtColor)
         window.blit(txt, [self.backX() + 20, self.topY() + 10])
-        txt = self.font.render("ARRIVAL TIME", True, (0, 0, 255))
+        txt = self.font.render("ARRIVAL TIME", True, self.txtColor)
         window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10])
-        txt = self.font.render("BURST TIME", True, (0, 0, 255))
+        txt = self.font.render("BURST TIME", True, self.txtColor)
         window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10])
 
         # Draw all the table data for each row
         for i, process in enumerate(self.table):
             # Draw the process labels in the first column
-            txt = self.font.render("P"+str(process[0]), True, (0, 0, 255))
+            txt = self.font.render("P"+str(process[0]), True, self.txtColor)
             window.blit(txt, [self.backX() + 20, self.topY() + 10 + (40*(i+1))])
 
             # Draw the process arrival time in the second column
-            txt = self.font.render(str(process[1]), True, (0, 0, 255))
+            txt = self.font.render(str(process[1]), True, self.txtColor)
             window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10 + (40*(i+1))])
 
             # Draw the process burst time in the third column
-            txt = self.font.render(str(process[2]), True, (0, 0, 255))
+            txt = self.font.render(str(process[2]), True, self.txtColor)
             window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10 + (40*(i+1))])

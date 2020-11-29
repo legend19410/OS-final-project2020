@@ -15,17 +15,17 @@ class Queue(OsObj):
         self.setCenterX(window.get_width()//2)
 
         # Draw the rectangle to hold 7 processes
-        pygame.draw.rect(window, self.color, self.rect,3)
+        pygame.draw.rect(window, self.bgColor, self.rect,3)
 
         # Draw the vertical lines for each cell of the queue
         t = self.width()//self.cellWidth
         for i in range(1, t+1):
-            pygame.draw.line(window, self.color, \
+            pygame.draw.line(window, self.bgColor, \
                 (self.backX() + (self.cellWidth*i), self.topY()), \
                 (self.backX() + (self.cellWidth*i), self.topY()+self.height()))
 
         # Draw label 'Queue' at the top of the queue
-        txt = self.font.render("Queue", True, (0, 0, 255))
+        txt = self.font.render("Queue", True, self.txtColor)
         window.blit(txt, self.computeTopLeft(self.center(), txt.get_size(), \
             0, -self.height()//2 - 10))
 

@@ -1,14 +1,17 @@
 import pygame
 
 class OsObj:
-    def __init__(self, body, font, color=(255, 255, 255)):
+    def __init__(self, body, font, bgColor=(255, 255, 255), \
+        txtColor = (0, 0, 255)):
+
         if (type(body) == pygame.Surface):
             self.img = body
             self.rect = self.img.get_rect()
         elif (type(body) == pygame.Rect):
             self.rect = body
 
-        self.color = color
+        self.bgColor = bgColor
+        self.txtColor = txtColor
         self.font = font
 
     def frontX(self):

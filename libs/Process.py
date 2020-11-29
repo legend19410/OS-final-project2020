@@ -5,7 +5,7 @@ class Process(OsObj):
     def __init__(self, ID, burstTime):
         img = pygame.image.load("resources/images/exe.png")
         img = pygame.transform.scale(img, (60, 60))
-        super().__init__(img, pygame.font.SysFont(None,30), (0, 0, 255))
+        super().__init__(img, pygame.font.SysFont(None,30))
 
         self.id = ID
         self.burstTime = burstTime
@@ -13,7 +13,7 @@ class Process(OsObj):
         self.setTopLeft(70, 40)
         self.stepSize = 30
         self.inCPU = False
-        self.label = self.font.render("P" + str(self.id), True, self.color)
+        self.label = self.font.render("P" + str(self.id), True, self.txtColor)
     
     def execute(self):
         """ Decrements the burst time and returns True if process is complete """
@@ -34,17 +34,20 @@ class Process(OsObj):
         # If the process is in the cpu draw the label just below the cpu
         # otherwise draw it just below the process
         if self.inCPU:
-            txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
+            txt = self.font.render(str(self.burstTime)+"ms", True, self.txtColor)
             window.blit(txt, self.computeTopLeft(self.center(), \
                 self.getDims(), 0, 120))
         else:
-            txt = self.font.render(str(self.burstTime)+"ms", True, self.color)
+            txt = self.font.render(str(self.burstTime)+"ms", True, self.txtColor)
             window.blit(txt, self.computeTopLeft(self.center(), \
                 self.getDims(), 0, self.height() + 5))
 
     def moveUp(self, stepSize=30):
         """ Moves the process up by the number of pixels specified """
+        print(str(self.topY()))
+        print(str(self.topY() - stepSize))
         self.setY(self.topY() - stepSize)
+        print(self.topY())
 
     def moveDown(self, stepSize=30):
         """ Moves the process down by the number of pixels specified """

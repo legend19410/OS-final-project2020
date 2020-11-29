@@ -1,4 +1,4 @@
-#import sys
+import sys
 import pygame
 
 from libs.CPU import CPU
@@ -18,7 +18,7 @@ def closeGameOnQuit():
     return True
 
 if __name__ == '__main__':
-    #args = sys.argv[1:]
+    args = sys.argv[1:]
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
     run = True
@@ -30,13 +30,13 @@ if __name__ == '__main__':
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     window.fill((255, 255, 255))
 
-    #fcfs = FCFS(window)
-    rr = RR(window)
+    fcfs = FCFS(window, args[0])
+    rr = RR(window, args[0])
 
     while run:
         pygame.time.Clock().tick(5)  # frame rate 5 frames per second
         run = closeGameOnQuit()  # exit on click the quit button
-        #fcfs.run()
+        fcfs.run()
         rr.run()
 
     pygame.quit()
