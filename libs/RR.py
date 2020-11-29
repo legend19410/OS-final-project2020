@@ -7,10 +7,13 @@ class RR(Scheduler):
         self.TIME_QUANTUM = 15
         self.timeBeforeInterrupt = self.TIME_QUANTUM
         self.STATE_DICT.update({"enqueue": self.enqueue, \
+            "dequeue": self.dequeue, \
             "requeue": self.requeue, \
             "execute": self.execute})
-        self.movingUp = False               #these are for the requeue functions
-        self.movingRight = False            #these are for the requeue functions
+
+        # Atributes to save the stte of the requeue operation
+        self.movingUp = False
+        self.movingRight = False
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
@@ -27,6 +30,38 @@ class RR(Scheduler):
                 self.nextProcess += 1
                 if (self.nextProcess == len(self.processList)):
                     self.state = "dequeue"
+
+    def dequeue(self):
+        """ Removes a process from the queue and adds it to the CPU for execution """
+
+        # If the CPU isn't busy send a process to be executed
+        if (self.CPU.lock):
+            self.state = "execute"
+        else:
+            # Checks if cpu has been updated with the next process
+            p = self.CPU.getProcess()
+            if ((p == None) or (p.burstTime == 0)):
+                self.timeBeforeInterrupt = self.TIME_QUANTUM
+                if (p != None):      # Catches case where a process arrives as the current one finishes
+                    self.processList.remove(self.CPU.getProcess())
+                    self.nextProcess -= 1
+                    self.finishedProcesses += 1
+                p = self.queue.dequeue(self.window)
+                if (p == None):     # Returns to waiting state if queue is empty
+                    self.state = "waiting"
+                    return None
+                self.CPU.setProcess(p)
+
+            dist = self.CPU.centerX() - p.centerX()
+            if (dist > p.stepSize):
+                if (dist <= (self.CPU.width() + p.width())//2):
+                    p.inCPU = True
+                p.moveRight()
+            else:
+                x, y = self.CPU.center()
+                p.setCenter(x, y)
+                self.CPU.lock = True
+                self.state = "execute"
 
     def execute(self):
         """ Decrements the burst time of the current process and interrupts
@@ -67,36 +102,20 @@ class RR(Scheduler):
                 p.moveLeft()
 
         # Move process up inline with queue after moving it behind the queue
-        # print("left: " + str(p.backX() <= left))
         if ((p.backX() <= left) and (not self.movingRight)):
             self.movingUp=True
             dist = p.topY() - up
-
-            # print("p: " + str(p) + " " + str(self.CPU.getProcess()))
-            # print("p in processList: " + str(p in self.processList))
-            # print("step check: " + str(dist > p.stepSize))
             if (dist > p.stepSize):
-                print("Moving...")
                 p.moveUp()
-                print("Moved")
             else:
-                # print("Moving 2")
                 p.moveUp(dist)
-                # print("Moved 2")
 
-        # Enqueue the process
-        # print("top process:",p.topY(), "      top q:", up)
-        # print("top: " + str(p.topY() == up))
         if (p.topY() == up):
-            # print("HEEEEE")
             self.movingRight = True
             dist = right - p.frontX()
-            # print("Distance to next queue slot:", dist)
             if (dist > p.stepSize):
                 p.moveRight()
-                # print("moving right")
             else:
-                # print("moving right 2")
                 p.moveRight(dist)
                 self.queue.enqueue(p)
                 self.CPU.setProcess(None)
@@ -105,4 +124,3 @@ class RR(Scheduler):
                 self.movingUp = False                
                 if (self.spawnProcess() == 0):
                     self.state = "dequeue"
-                    self.timeBeforeInterrupt = self.TIME_QUANTUM

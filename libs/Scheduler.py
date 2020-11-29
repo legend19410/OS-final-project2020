@@ -77,7 +77,6 @@ class Scheduler:
         else:
             # Checks if cpu has been updated with the next process
             p = self.CPU.getProcess()
-
             if ((p == None) or (p.burstTime == 0)):
                 if (p != None):      # Catches case where a process arrives as the current one finishes
                     self.processList.remove(self.CPU.getProcess())

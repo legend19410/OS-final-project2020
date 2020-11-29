@@ -75,6 +75,7 @@ class SPN(Scheduler):
                     p.moveUp()
                 else:
                     p.moveUp(dist)
+                    self.target = None
                     self.state = "enqueue"
 
     def execute(self):
