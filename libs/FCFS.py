@@ -1,7 +1,3 @@
-from libs.CPU import CPU
-from libs.Process import Process
-from libs.Queue import Queue
-from libs.Table import Table
 from libs.Scheduler import Scheduler
 
 class FCFS(Scheduler):

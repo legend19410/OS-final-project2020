@@ -1,8 +1,3 @@
-from libs.CPU import CPU
-from libs.Process import Process
-from libs.Queue import Queue
-from libs.Table import Table
-from libs.Clock import Clock
 from libs.Scheduler import Scheduler
 
 class RR(Scheduler):
@@ -33,7 +28,7 @@ class RR(Scheduler):
 
     def execute(self):
         """ Decrements the burst time of the current process and interrupts
-            execution if the time slice has been exhausted"""
+            execution if the time slice has been exhausted """
 
         if (not self.CPU.lock):                 # The process finished before the time slice
             self.processList.remove(self.CPU.getProcess())

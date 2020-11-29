@@ -31,7 +31,11 @@ class Queue(OsObj):
 
     def getEndPtr(self):
         """ Returns the x-coordinate of the end of the queue """
-        return self.frontX() - len(self.queue)*self.cellWidth
+        return self.frontX() - self.getLen()*self.cellWidth
+
+    def getLen(self):
+        """ Returns the length of the queue """
+        return len(self.queue)
 
     def enqueue(self, process):
         """ Adds a process to the back of the queue """
@@ -42,9 +46,18 @@ class Queue(OsObj):
             Returns None if queue is empty """
         try:
             for p in self.queue:
-                x, y = p.topLeft()
-                x += self.cellWidth
                 p.moveRight(self.cellWidth)
             return self.queue.pop(0)
         except IndexError:
             return None
+
+    def shuffleFrom(self, index):
+        """ Removes the last process in the queue and places it at the
+            index given. Also shuffles down th processes down visually
+            leaving room for the end process to be moved in """
+
+        end = self.queue.pop(-1)
+        self.queue.insert(index, end)
+        for i in range(self.getLen()-1, index, -1):
+            p = self.queue[i]
+            p.moveLeft(self.cellWidth)

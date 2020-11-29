@@ -44,10 +44,7 @@ class Process(OsObj):
 
     def moveUp(self, stepSize=30):
         """ Moves the process up by the number of pixels specified """
-        print(str(self.topY()))
-        print(str(self.topY() - stepSize))
         self.setY(self.topY() - stepSize)
-        print(self.topY())
 
     def moveDown(self, stepSize=30):
         """ Moves the process down by the number of pixels specified """
