@@ -1,6 +1,8 @@
 import sys
 import pygame
 
+from libs.menu import menu
+
 from libs.CPU import CPU
 from libs.Process import Process
 from libs.Queue import Queue
@@ -14,8 +16,9 @@ from libs.SRT import SRT
 def closeGameOnQuit():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return True
-    return False
+            pygame.quit()
+            quit()
+    
 
 if __name__ == '__main__':
     args = sys.argv[1:]
@@ -27,7 +30,7 @@ if __name__ == '__main__':
         speed = 0.25
     else:
         mode = "normal"
-        speed = 0.1
+        speed = 0.25
 
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
@@ -49,12 +52,13 @@ if __name__ == '__main__':
     
     srt = SRT(window, [(1, 3, 2), (2, 5, 13), (3, 7, 15), (4, 10, 2), \
             (5, 15, 5), (6, 20, 28), (7, 25, 30)])
-
+    
+    algorithms = {"fcfs":fcfs.run, "rr":rr.run, "spn":spn.run, "srt":srt.run}
+    menu = menu(window)#create menu
     while run:
-        pygame.time.Clock().tick(5)  # frame rate 5 frames per second
-        # fcfs.run(mode, speed)
-        # rr.run(mode, speed)
-        # spn.run(mode, speed)
-        srt.run(mode,speed)
-        run = closeGameOnQuit()  # exit on click the quit button
-    pygame.quit()
+        pygame.time.Clock().tick(8)  # frame rate 5 frames per second
+        btn = menu.run()
+        if(btn):
+            algorithms[btn](mode)
+        closeGameOnQuit()  # exit on click the quit button
+    # pygame.quit()

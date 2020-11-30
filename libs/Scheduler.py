@@ -8,8 +8,16 @@ from libs.Table import Table
 from libs.Clock import Clock
 
 class Scheduler:
-    def __init__(self, window, processes):
+    def __init__(self, window,processes):
         # Dictionary of processes indexed on arrival time
+        self.options_color = (0,0,255)       #blue
+        self.hover_color = (0,255,00)
+        self.heading_font = pygame.font.Font('freesansbold.ttf',25)
+        self.window = window
+        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = pygame.display.get_window_size()
+        self.speed=0.25
+        self.speeds = [1, 0.5, 0.25, 0.15, 0.1, 0.05]
+
         self.processes = {}
         for id, arrivalTime, burstTime in processes:
             proc = Process(id, burstTime)
@@ -40,7 +48,7 @@ class Scheduler:
             "sort": self.invalidState, \
             "execute": self.invalidState}
 
-    def run(self, mode="normal", speed=0.25):
+    def run(self, mode="normal"):
         """ Simulates scheduler using the processes given """
 
         self.clock.setMode(mode)
@@ -51,7 +59,7 @@ class Scheduler:
             self.STATE_DICT[self.state]()
             self.updateWindow()
             self.closeGameOnQuit()
-            time.sleep(speed)
+            time.sleep(self.speed)
 
     def spawnProcess(self):
         """ Spawns a newly arrived process. Sets state to enqueue if successful """
@@ -114,6 +122,7 @@ class Scheduler:
         self.table.draw(self.window)
         self.queue.draw(self.window)
         self.clock.draw(self.window)
+        self.generateControlButtons()
         for p in self.processList:
             p.draw(self.window)
         pygame.display.update()
@@ -138,3 +147,62 @@ class Scheduler:
         msg = "Plese reassign the method of this state...\n"
         msg += "Current State: " + self.state
         raise Exception(msg)
+
+
+    def generateControlButtons(self):
+        # options_box1 = pygame.Rect((0, 0), (420, 30))
+        # options_box1.center = ((self.SCREEN_WIDTH/2),(self.SCREEN_HEIGHT/4))
+        options_box2 = pygame.Rect((0, self.SCREEN_HEIGHT-30), (100, 30))
+        # options_box2.center = ((self.SCREEN_WIDTH/2),(options_box1.bottom+40))
+        options_box3 = pygame.Rect((options_box2.right+20, self.SCREEN_HEIGHT-30), (100, 30))
+        # options_box3.center = ((self.SCREEN_WIDTH/2),(options_box2.bottom+40))
+        # options_box4 = pygame.Rect((0, 0), (100, 30))
+        # options_box4.center = ((self.SCREEN_WIDTH/2),(options_box3.bottom+40))
+
+        # print(options_box1.right)
+        
+
+        #display the words in the rectangles
+        options_font = pygame.font.Font(None,24)
+        speedbtn=self.createButton("SPEED " + str(self.speed), options_box2, options_font,\
+            self.hover_color,self.options_color, 3)
+        
+        pausebtn=self.createButton("PAUSE", options_box3, options_font,\
+        self.hover_color,self.options_color, 3)
+        
+        if (speedbtn):
+            cur = self.speeds.index(self.speed)
+            if cur == (len(self.speeds)-1):
+                self.speed = self.speeds[0]
+            else:
+                self.speed = self.speeds[cur+1]
+        
+        if (pausebtn):
+            pausebtn=False
+            while not pausebtn:
+                for event in pygame.event.get():
+                    continue
+                pausebtn=self.createButton("PAUSE", options_box3, options_font,\
+                    self.hover_color,self.options_color, 3)
+                pygame.time.Clock().tick(10)  # frame rate 5 frames per second
+            
+
+    def createText(self,words, font, colour):
+        text = font.render(words, True, colour)
+        return text, text.get_rect()
+
+    def createButton(self, words, box, font,color, color2, size):
+        mouse_pos = pygame.mouse.get_pos()
+        clicked = pygame.mouse.get_pressed()
+        event = False
+        if box.right > mouse_pos[0] > box.left and box.bottom > mouse_pos[1] > box.top:
+                pygame.draw.rect(self.window, color,box,size)
+                if clicked[0] == 1:
+                    event = True
+        else:
+            pygame.draw.rect(self.window, color2, box,3)
+
+        box_text, box_surf = self.createText(words, font, color2)
+        box_surf.center = box.center
+        self.window.blit(box_text, box_surf)
+        return event
