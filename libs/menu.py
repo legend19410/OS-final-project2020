@@ -49,12 +49,16 @@ class menu:
         pygame.display.update()
 
         if (btn1):
+            pygame.display.set_caption("First Come First Serve Simulator")
             return "fcfs"
         elif btn2:
+            pygame.display.set_caption("Round Robin Simulator")
             return "rr"
         elif btn3:
+            pygame.display.set_caption("Shortest Process Next Simulator")
             return "spn"
         elif btn4:
+            pygame.display.set_caption("Shortest Remaining Time Simulator")
             return "srt"
         return None
     

@@ -17,19 +17,31 @@ class RR(Scheduler):
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
-
-        p = self.processList[self.nextProcess]
-        back = self.queue.getEndPtr()
-        if (p.frontX() < back):
-            dist = back - p.frontX()
-            if (dist > p.stepSize):
-                p.moveRight()
-            else:
-                p.moveRight(dist)
-                self.queue.enqueue(p)
-                self.nextProcess += 1
-                if (self.nextProcess == len(self.processList)):
-                    self.state = "dequeue"
+        
+        if self.queue.isSpaceAvailable():
+            p = self.processList[self.nextProcess]
+            back = self.queue.getEndPtr()
+            if (p.frontX() < back):
+                dist = back - p.frontX()
+                if (dist > p.stepSize):
+                    p.moveRight()
+                else:
+                    p.moveRight(dist)
+                    self.queue.enqueue(p)
+                    self.nextProcess += 1
+                    if (self.nextProcess == len(self.processList)):
+                        self.state = "dequeue"
+                    # else:
+                    #     if not self.queue.isSpaceAvailable():
+                    #         self.state = "dequeue"
+                    #     else:
+                    #         print("Queue lenght:", self.queue.getLen())
+                    #         self.state = "enqueue"
+            # self.newlyadded-=1
+        elif self.CPU.lock:
+            self.state = "execute"
+        else:
+            self.state = "dequeue"
 
     def dequeue(self):
         """ Removes a process from the queue and adds it to the CPU for execution """
@@ -85,7 +97,7 @@ class RR(Scheduler):
         """ Moves the current process back into the queue and updates the CPU """
 
         p = self.CPU.getProcess()
-        down = self.CPU.bottomY() + 10
+        down = self.CPU.bottomY()-20
         left = self.queue.backX() - 90
         up = self.queue.topY()
         right = self.queue.getEndPtr()

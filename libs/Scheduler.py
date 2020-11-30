@@ -16,12 +16,13 @@ class Scheduler:
         self.input_font = pygame.font.Font('freesansbold.ttf',15)
         self.window = window
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = pygame.display.get_window_size()
-        self.speed=0.25
-        self.speeds = [1, 0.5, 0.25, 0.15, 0.1, 0.05]
+        self.speed=0.15
+        self.speeds = [0.5, 0.25, 0.15, 0.1, 0.05, 0.01]
         self.input_text = ""
         self.input_text2 = ""
         self.options_box4 = None
         self.options_box5 = None
+        self.playbtntext = "PAUSE"
         self.box4_color = (0,0,255)  
         self.box5_color = (0,0,255) 
         self.input=False
@@ -58,17 +59,24 @@ class Scheduler:
             "sort": self.invalidState, \
             "execute": self.invalidState}
 
-    def run(self,mode="normal"):
+    def run(self,speed,mode="normal"):
         """ Simulates scheduler using the processes given """
+        self.speed = speed
         self.clock.setMode(mode)
         self.updateWindow()
         # Run until all processes have been executed
+        
         while (self.finishedProcesses < self.numProcesses):
-            self.stepModeWait()
-            self.STATE_DICT[self.state]()
-            self.updateWindow()
-            self.getEvents()
-            time.sleep(self.speed)
+            print(self.finishedProcesses, self.numProcesses)
+            if not self.clock.getMode()=="paused":
+                self.stepModeWait()
+                self.STATE_DICT[self.state]()
+                self.updateWindow()
+                self.getEvents()
+                time.sleep(self.speed)
+            else:
+                self.updateWindow()
+                self.getEvents()
 
     def spawnProcess(self):
         """ Spawns a newly arrived process. Sets state to enqueue if successful """
@@ -129,6 +137,7 @@ class Scheduler:
             p.draw(self.window)
         pygame.display.update()
     
+
     def stepModeWait(self):
         """ Waits on user input before changing state if in the scheduler is in 'step' mode """
 
@@ -188,7 +197,7 @@ class Scheduler:
 
         pidl = pygame.font.Font('freesansbold.ttf',20)
         input_label = pidl.render("P"+str(self.lpid), True, (0,0,255))
-        self.window.blit(input_label, (self.options_box5.left-30,self.options_box5.top+5) )
+        self.window.blit(input_label, (self.options_box5.left-40,self.options_box5.top+5) )
         
         ihf2 = pygame.font.Font('freesansbold.ttf',23)
         ih2 = ihf2.render("Add Processes", True, (0,0,255))
@@ -204,43 +213,55 @@ class Scheduler:
         speedbtn=self.createButton("SPEEDx" + str(self.speed), options_box2, options_font,\
             self.hover_color,self.options_color, 3)
         
-        pausebtn=self.createButton("PAUSE", options_box3, options_font,\
+        pausebtn=self.createButton(self.playbtntext, options_box3, options_font,\
         self.hover_color,self.options_color, 3)
 
         okbtn=self.createButton("OK", options_box1, options_font,\
         self.hover_color,self.options_color, 3)        
         
-        if (speedbtn):
+        if (speedbtn):     #if speed button is pressed
             cur = self.speeds.index(self.speed)
             if cur == (len(self.speeds)-1):
                 self.speed = self.speeds[0]
             else:
                 self.speed = self.speeds[cur+1]
         
-        if (pausebtn):
+        if (pausebtn):         #if paused button is pressed
             pausebtn=False
-            while not pausebtn:
-                for event in pygame.event.get():
-                    continue
-                pausebtn=self.createButton("PAUSE", options_box3, options_font,\
-                    self.hover_color,self.options_color, 3)
-                pygame.time.Clock().tick(10)  # frame rate 5 frames per second
+            if not self.clock.getMode() == "paused":
+                self.clock.setMode("paused")
+                self.playbtntext = "PLAY"
+            else:
+                self.clock.setMode("normal")
+                self.playbtntext = "PAUSE"
         
-        if (okbtn):
+        if (okbtn):    #if ok btn is pressed
             try:
                 arrive_time = int(self.input_text2)
                 burst_time = int(self.input_text)
                 # arrive_time = self.clock.getTime()+1
                 if(arrive_time and burst_time):
-                    new = Process(self.lpid, burst_time)
-                    self.processes[arrive_time] = [new]
-                    self.table.updateProcessTable((self.lpid,arrive_time, burst_time))
-                    self.lpid+=1
-                    self.input_text = ""
-                    self.input_text2 = ""
+                    if arrive_time > self.clock.getTime():
+                        new = Process(self.lpid, burst_time)
+                        try:
+                            self.processes[arrive_time].append(new)
+                        except KeyError:
+                            self.processes[arrive_time] = [new]
+
+                        self.numProcesses = self.calculateNumProcesses()
+                        print(self.numProcesses)
+                        self.table.updateProcessTable((self.lpid,arrive_time, burst_time))
+                        self.lpid+=1
+                        self.input_text = ""
+                        self.input_text2 = ""
             except:
                 pass
-            
+    def calculateNumProcesses(self):
+        """Calculate the number of processes remaining"""
+        total = 0
+        for processList in self.processes.values():
+            total+=len(processList)
+        return total
 
     def createText(self,words, font, colour):
         text = font.render(words, True, colour)
@@ -268,7 +289,6 @@ class Scheduler:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.options_box4.collidepoint(event.pos):
@@ -291,3 +311,5 @@ class Scheduler:
                     if event.key == pygame.K_BACKSPACE:
                         self.input_text2 = self.input_text[:-1]
                     self.input_text2+=event.unicode
+        
+        time.sleep(0.05)

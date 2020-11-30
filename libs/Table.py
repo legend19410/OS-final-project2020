@@ -3,7 +3,7 @@ from libs.OsObj import OsObj
 
 class Table(OsObj):
     def __init__(self, processTable):
-        super().__init__(pygame.Rect((267, 200), (480, 320)), \
+        super().__init__(pygame.Rect((267, 290), (480, 340)), \
             pygame.font.SysFont(None, 30), (255, 0, 0))
         self.table = processTable
         self.colWidth = 160
@@ -21,7 +21,7 @@ class Table(OsObj):
         # Centering table relative to window
         width, height = window.get_size()
         self.setCenterX(width//2)
-        self.setY(height - self.height() - 10)
+        self.setY(height - self.height())
         
         # Draw the bounding rectangle
         pygame.draw.rect(window, self.bgColor, self.rect, 3)
@@ -47,7 +47,7 @@ class Table(OsObj):
         window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10])
         txt = self.font.render("BURST TIME", True, self.txtColor)
         window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10])
-        
+
         # Draw all the table data for each row
         for i, process in enumerate(self.table):
             # Draw the process labels in the first column

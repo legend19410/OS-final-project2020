@@ -6,7 +6,7 @@ class Clock(OsObj):
     def __init__(self, mode="normal"):
         super().__init__(pygame.Rect((900, 700), (100, 100)), \
             pygame.font.SysFont(None, 30))
-        self.VALID_MODES = ("normal", "step")
+        self.VALID_MODES = ("normal", "step", "paused")
         self.mode = mode
         self.txt = "Elapsed Time: "
         self.cycles = 0

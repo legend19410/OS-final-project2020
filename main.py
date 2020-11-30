@@ -44,22 +44,26 @@ if __name__ == '__main__':
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     window.fill((255, 255, 255))
 
-    fcfs = FCFS(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
-            (5, 15, 15), (6, 20, 28), (7, 25, 30)])
-    rr = RR(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
-             (5, 15, 15), (6, 20, 28), (7, 25, 30)])
-    spn = SPN(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
-            (5, 15, 15), (6, 20, 28), (7, 25, 30)])
+    default_processes = [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
+            (5, 15, 15), (6, 20, 28), (7, 25, 30)]
+
+    fcfs = FCFS(window, default_processes)
+    rr = RR(window, default_processes)
+    spn = SPN(window, default_processes)
     
-    srt = SRT(window, [(1, 3, 2), (2, 5, 13), (3, 7, 15), (4, 10, 2), \
-            (5, 15, 5), (6, 20, 28), (7, 25, 30)])
+    srt = SRT(window, default_processes)
     
-    algorithms = {"fcfs":fcfs.run, "rr":rr.run, "spn":spn.run, "srt":srt.run}
+    algorithms = {"fcfs":fcfs, "rr":rr, "spn":spn, "srt":srt}
+    al_classes = {"fcfs":FCFS, "rr":RR, "spn":SPN, "srt":SRT}
     menu = menu(window)#create menu
     while run:
-        pygame.time.Clock().tick(8)  # frame rate 5 frames per second
+        pygame.display.set_caption("Scheduler Simulator")
+        pygame.time.Clock().tick(10)  # frame rate 5 frames per second
+
         btn = menu.run()
         if(btn):
-            algorithms[btn](mode)
+            algorithms[btn].run(speed,mode)
+            algorithms[btn]=al_classes[btn](window, default_processes) #reinitialize algorithm so if chosen again
+                                                                       #it starts fresh
         closeGameonQuit()  # exit on click the quit button
     # pygame.quit()

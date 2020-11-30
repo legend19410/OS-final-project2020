@@ -7,6 +7,7 @@ class Queue(OsObj):
             pygame.font.SysFont(None, 30), (255, 0, 0))
         self.queue = []
         self.cellWidth = 60
+        self.max_len = 7
 
     def draw(self, window):
         """ Draw the queue on the screen """
@@ -36,22 +37,21 @@ class Queue(OsObj):
     def getLen(self):
         """ Returns the length of the queue """
         return len(self.queue)
+    
+    def isSpaceAvailable(self):
+        """returns a boolean value of the queue capacity status"""
+        return self.getLen() < self.max_len-1
 
     def enqueue(self, process):
         """ Adds a process to the back of the queue """
         self.queue.append(process)
-
+    
     def dequeue(self, window, al=None):
         """ Removes a process from the front of the queue and returns it.
             Returns None if queue is empty """
         try:            
             if al=="spn" or al=="srt":
                 shortest_job = self.getShortestJob()
-                # shortest_job = self.queue[0]
-                # for p in self.queue[1:]:
-                #     # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
-                #     if p.getBurstTime() < shortest_job.getBurstTime():
-                #         shortest_job = p
                 
                 index = self.queue.index(shortest_job)
                 self.queue.pop(index)
@@ -72,7 +72,6 @@ class Queue(OsObj):
         try:
             shortest_job = self.queue[0]
             for p in self.queue[1:]:
-                # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
                 if p.getBurstTime() < shortest_job.getBurstTime():
                     shortest_job = p   
             return shortest_job
