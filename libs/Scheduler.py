@@ -13,10 +13,20 @@ class Scheduler:
         self.options_color = (0,0,255)       #blue
         self.hover_color = (0,255,00)
         self.heading_font = pygame.font.Font('freesansbold.ttf',25)
+        self.input_font = pygame.font.Font('freesansbold.ttf',15)
         self.window = window
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = pygame.display.get_window_size()
         self.speed=0.25
         self.speeds = [1, 0.5, 0.25, 0.15, 0.1, 0.05]
+        self.input_text = ""
+        self.input_text2 = ""
+        self.options_box4 = None
+        self.options_box5 = None
+        self.box4_color = (0,0,255)  
+        self.box5_color = (0,0,255) 
+        self.input=False
+        self.input2=False
+        self.lpid = processes[-1][0]+1
 
         self.processes = {}
         for id, arrivalTime, burstTime in processes:
@@ -48,9 +58,8 @@ class Scheduler:
             "sort": self.invalidState, \
             "execute": self.invalidState}
 
-    def run(self, mode="normal"):
+    def run(self,mode="normal"):
         """ Simulates scheduler using the processes given """
-
         self.clock.setMode(mode)
         self.updateWindow()
         # Run until all processes have been executed
@@ -58,7 +67,7 @@ class Scheduler:
             self.stepModeWait()
             self.STATE_DICT[self.state]()
             self.updateWindow()
-            self.closeGameOnQuit()
+            self.getEvents()
             time.sleep(self.speed)
 
     def spawnProcess(self):
@@ -107,13 +116,6 @@ class Scheduler:
                 self.CPU.lock = True
                 self.state = "execute"
 
-    def closeGameOnQuit(self):
-        """ Manages closing of the simulator """
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-
     def updateWindow(self):
         """ Redraws all the elements on the screen and updates the display """
 
@@ -150,25 +152,63 @@ class Scheduler:
 
 
     def generateControlButtons(self):
-        # options_box1 = pygame.Rect((0, 0), (420, 30))
+        options_box1 = pygame.Rect((50, self.SCREEN_HEIGHT-230), (180, 30))
         # options_box1.center = ((self.SCREEN_WIDTH/2),(self.SCREEN_HEIGHT/4))
-        options_box2 = pygame.Rect((0, self.SCREEN_HEIGHT-30), (100, 30))
+        options_box2 = pygame.Rect((5, self.SCREEN_HEIGHT-30), (102, 30))
         # options_box2.center = ((self.SCREEN_WIDTH/2),(options_box1.bottom+40))
         options_box3 = pygame.Rect((options_box2.right+20, self.SCREEN_HEIGHT-30), (100, 30))
         # options_box3.center = ((self.SCREEN_WIDTH/2),(options_box2.bottom+40))
-        # options_box4 = pygame.Rect((0, 0), (100, 30))
+        self.options_box4 = pygame.Rect((options_box3.left+20,options_box3.top-250), (80, 30))
+        self.options_box5 = pygame.Rect((self.options_box4.left-90,self.options_box4.top), (80, 30))
+
+        if self.input:
+            self.box4_color = (0,255,0)
+        else:
+            self.box4_color = (0,0,255)
+
+        if self.input2:
+            self.box5_color = (0,255,0)
+        else:
+            self.box5_color = (0,0,255)
+
+        pygame.draw.rect(self.window, self.box4_color, self.options_box4,1)
+        pygame.draw.rect(self.window, self.box5_color, self.options_box5,1)
         # options_box4.center = ((self.SCREEN_WIDTH/2),(options_box3.bottom+40))
+        text = self.input_font.render(self.input_text, True, (0,0,0))
+        self.window.blit(text, (self.options_box4.left+5,self.options_box4.top+5))
+
+        text2 = self.input_font.render(self.input_text2, True, (0,0,0))
+        self.window.blit(text2, (self.options_box5.left+5,self.options_box5.top+5))
+
+        ihf = pygame.font.Font('freesansbold.ttf',15)
+        input_heading = ihf.render("Burst Time", True, (0,0,255))
+        self.window.blit(input_heading, (self.options_box4.left,self.options_box4.top-20) )
+        input_heading = ihf.render("Arrive Time", True, (0,0,255))
+        self.window.blit(input_heading, (self.options_box5.left,self.options_box5.top-20) )
+
+        pidl = pygame.font.Font('freesansbold.ttf',20)
+        input_label = pidl.render("P"+str(self.lpid), True, (0,0,255))
+        self.window.blit(input_label, (self.options_box5.left-30,self.options_box5.top+5) )
+        
+        ihf2 = pygame.font.Font('freesansbold.ttf',23)
+        ih2 = ihf2.render("Add Processes", True, (0,0,255))
+        self.window.blit(ih2, (self.options_box5.left,self.options_box4.top-50) )
+    
+        # self.options_box4.width = max(2, text.get_width()+5)
 
         # print(options_box1.right)
         
 
         #display the words in the rectangles
         options_font = pygame.font.Font(None,24)
-        speedbtn=self.createButton("SPEED " + str(self.speed), options_box2, options_font,\
+        speedbtn=self.createButton("SPEEDx" + str(self.speed), options_box2, options_font,\
             self.hover_color,self.options_color, 3)
         
         pausebtn=self.createButton("PAUSE", options_box3, options_font,\
         self.hover_color,self.options_color, 3)
+
+        okbtn=self.createButton("OK", options_box1, options_font,\
+        self.hover_color,self.options_color, 3)        
         
         if (speedbtn):
             cur = self.speeds.index(self.speed)
@@ -185,6 +225,21 @@ class Scheduler:
                 pausebtn=self.createButton("PAUSE", options_box3, options_font,\
                     self.hover_color,self.options_color, 3)
                 pygame.time.Clock().tick(10)  # frame rate 5 frames per second
+        
+        if (okbtn):
+            try:
+                arrive_time = int(self.input_text2)
+                burst_time = int(self.input_text)
+                # arrive_time = self.clock.getTime()+1
+                if(arrive_time and burst_time):
+                    new = Process(self.lpid, burst_time)
+                    self.processes[arrive_time] = [new]
+                    self.table.updateProcessTable((self.lpid,arrive_time, burst_time))
+                    self.lpid+=1
+                    self.input_text = ""
+                    self.input_text2 = ""
+            except:
+                pass
             
 
     def createText(self,words, font, colour):
@@ -206,3 +261,33 @@ class Scheduler:
         box_surf.center = box.center
         self.window.blit(box_text, box_surf)
         return event
+    
+    def getEvents(self):
+        """Gets all events and updates parameters"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.options_box4.collidepoint(event.pos):
+                    self.input = True
+                else:
+                    self.input = False
+                
+                if self.options_box5.collidepoint(event.pos):
+                    self.input2 = True
+                else:
+                    self.input2 = False
+
+            if event.type == pygame.KEYDOWN:
+                if self.input:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.input_text = self.input_text[:-1]
+                    self.input_text+=event.unicode
+
+                if self.input2:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.input_text2 = self.input_text[:-1]
+                    self.input_text2+=event.unicode

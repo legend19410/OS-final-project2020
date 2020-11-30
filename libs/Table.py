@@ -7,7 +7,13 @@ class Table(OsObj):
             pygame.font.SysFont(None, 30), (255, 0, 0))
         self.table = processTable
         self.colWidth = 160
-        self.rowHeight = 40
+        self.rowHeight = 22
+        self.font = pygame.font.Font(None, 19)
+    
+
+    def updateProcessTable(self,new_proc):
+        """Updates Process Table with recently added process"""
+        self.table.append(new_proc)
 
     def draw(self, window):
         """ Draw the process table with the info given onto the screen """
@@ -41,17 +47,17 @@ class Table(OsObj):
         window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10])
         txt = self.font.render("BURST TIME", True, self.txtColor)
         window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10])
-
+        
         # Draw all the table data for each row
         for i, process in enumerate(self.table):
             # Draw the process labels in the first column
             txt = self.font.render("P"+str(process[0]), True, self.txtColor)
-            window.blit(txt, [self.backX() + 20, self.topY() + 10 + (40*(i+1))])
+            window.blit(txt, [self.backX() + 20, self.topY() + 10 + (self.rowHeight*(i+1))])
 
             # Draw the process arrival time in the second column
             txt = self.font.render(str(process[1]), True, self.txtColor)
-            window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10 + (40*(i+1))])
+            window.blit(txt, [self.backX() + 10 + 160, self.topY() + 10 + (self.rowHeight*(i+1))])
 
             # Draw the process burst time in the third column
             txt = self.font.render(str(process[2]), True, self.txtColor)
-            window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10 + (40*(i+1))])
+            window.blit(txt, [self.backX() + 20 + (2*160), self.topY() + 10 + (self.rowHeight*(i+1))])

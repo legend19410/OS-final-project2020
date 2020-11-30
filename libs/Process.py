@@ -18,6 +18,10 @@ class Process(OsObj):
     def getBurstTime(self):
         """returns the burst time of a process"""
         return self.burstTime
+    
+    def getID(self):
+        """returns the id of a process"""
+        return self.id
 
     def execute(self):
         """ Decrements the burst time and returns True if process is complete """

@@ -48,7 +48,6 @@ class SRT(Scheduler):
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
                 p = self.queue.dequeue(self.window, "srt")
-                print("was here")
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
                     return None

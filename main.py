@@ -13,7 +13,7 @@ from libs.RR import RR
 from libs.SPN import SPN
 from libs.SRT import SRT
 
-def closeGameOnQuit():
+def closeGameonQuit():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -30,11 +30,12 @@ if __name__ == '__main__':
         speed = 0.25
     else:
         mode = "normal"
-        speed = 0.25
+        speed = 0.15
 
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
     run = True
+    text_input2 = ""
 
     pygame.init()
     icon = pygame.image.load("resources/images/icon.png")
@@ -60,5 +61,5 @@ if __name__ == '__main__':
         btn = menu.run()
         if(btn):
             algorithms[btn](mode)
-        closeGameOnQuit()  # exit on click the quit button
+        closeGameonQuit()  # exit on click the quit button
     # pygame.quit()
