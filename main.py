@@ -9,7 +9,7 @@ from libs.Table import Table
 from libs.FCFS import FCFS
 from libs.RR import RR
 from libs.SPN import SPN
-#from libs.<> import <>
+from libs.SRT import SRT
 
 def closeGameOnQuit():
     for event in pygame.event.get():
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         speed = 0.25
     else:
         mode = "normal"
-        speed = 0.25
+        speed = 0.1
 
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
@@ -46,11 +46,15 @@ if __name__ == '__main__':
              (5, 15, 15), (6, 20, 28), (7, 25, 30)])
     spn = SPN(window, [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
             (5, 15, 15), (6, 20, 28), (7, 25, 30)])
+    
+    srt = SRT(window, [(1, 3, 2), (2, 5, 13), (3, 7, 15), (4, 10, 2), \
+            (5, 15, 5), (6, 20, 28), (7, 25, 30)])
 
     while run:
         pygame.time.Clock().tick(5)  # frame rate 5 frames per second
         # fcfs.run(mode, speed)
         # rr.run(mode, speed)
-        spn.run(mode, speed)
+        # spn.run(mode, speed)
+        srt.run(mode,speed)
         run = closeGameOnQuit()  # exit on click the quit button
     pygame.quit()

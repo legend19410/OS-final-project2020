@@ -1,16 +1,15 @@
 from libs.Scheduler import Scheduler
 
-class RR(Scheduler):
+class SRT(Scheduler):
     def __init__(self, window, processes=[(1,5,33), (2,2,32), \
             (3,3,44), (4,9,27), (5,10,58), (6,20,34), (7,30, 80)]):
         super().__init__(window, processes)
-        self.TIME_QUANTUM = 15
-        self.timeBeforeInterrupt = self.TIME_QUANTUM
         self.STATE_DICT.update({"enqueue": self.enqueue, \
-            "dequeue": self.dequeue, \
             "requeue": self.requeue, \
             "execute": self.execute})
-
+        self.target = None
+        self.newProcess = None
+        
         # Atributes to save the stte of the requeue operation
         self.movingUp = False
         self.movingRight = False
@@ -18,6 +17,7 @@ class RR(Scheduler):
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
 
+        # print ("Next process:",self.nextProcess, "Len proc List:",len(self.processList))
         p = self.processList[self.nextProcess]
         back = self.queue.getEndPtr()
         if (p.frontX() < back):
@@ -31,6 +31,7 @@ class RR(Scheduler):
                 if (self.nextProcess == len(self.processList)):
                     self.state = "dequeue"
 
+
     def dequeue(self):
         """ Removes a process from the queue and adds it to the CPU for execution """
 
@@ -40,13 +41,14 @@ class RR(Scheduler):
         else:
             # Checks if cpu has been updated with the next process
             p = self.CPU.getProcess()
+
             if ((p == None) or (p.burstTime == 0)):
-                self.timeBeforeInterrupt = self.TIME_QUANTUM
                 if (p != None):      # Catches case where a process arrives as the current one finishes
                     self.processList.remove(self.CPU.getProcess())
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
-                p = self.queue.dequeue(self.window)
+                p = self.queue.dequeue(self.window, "srt")
+                print("was here")
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
                     return None
@@ -64,22 +66,35 @@ class RR(Scheduler):
                 self.state = "execute"
 
     def execute(self):
-        """ Decrements the burst time of the current process and interrupts
-            execution if the time slice has been exhausted """
-
-        if (not self.CPU.lock):                 # The process finished before the time slice
+        """ Executes the current process to completion before removing
+            the process from the cpu and releasing the lock """
+        
+        if self.checkForShorterJob():
+            self.state = "requeue"
+        elif (self.CPU.lock):
+            self.CPU.execute()
+            self.clock.increment()
+            self.spawnProcess()
+        else:
             self.processList.remove(self.CPU.getProcess())
             self.nextProcess -= 1
             self.CPU.setProcess(None)
-            self.finishedProcesses += 1
+            # self.finishedProcesses += 1
             self.state = "dequeue"
-        elif (self.timeBeforeInterrupt == 0):   # The time slice finished before the process
-            self.state = "requeue"
-        else:                                   # The process still has time to execute
-            self.CPU.execute()
-            self.clock.increment()
-            self.timeBeforeInterrupt -= 1
-            self.spawnProcess()
+        
+    
+    def checkForShorterJob(self):
+        """Check if there is a shorter job in queue than current process"""
+        shortest_job = self.queue.getShortestJob()
+        cpu_proc = self.CPU.getProcess()
+        if (shortest_job and cpu_proc):
+            # print("sj",shortest_job.getBurstTime(),"cpuj", cpu_proc.getBurstTime())
+            if shortest_job.getBurstTime() < cpu_proc.getBurstTime():
+                return True
+        return False
+        # # self.state = "requeue"
+        # return False
+
 
     def requeue(self):
         """ Moves the current process back into the queue and updates the CPU """
@@ -122,5 +137,6 @@ class RR(Scheduler):
                 self.CPU.lock = False
                 self.movingRight = False
                 self.movingUp = False                
-                if (self.spawnProcess() == 0):
-                    self.state = "dequeue"
+                # if (self.spawnProcess() == 0):
+                #     self.state = "dequeue"
+                self.state = "dequeue"

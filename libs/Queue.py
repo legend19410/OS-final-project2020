@@ -46,11 +46,12 @@ class Queue(OsObj):
             Returns None if queue is empty """
         try:            
             if al=="spn" or al=="srt":
-                shortest_job = self.queue[0]
-                for p in self.queue[1:]:
-                    # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
-                    if p.getBurstTime() < shortest_job.getBurstTime():
-                        shortest_job = p
+                shortest_job = self.getShortestJob()
+                # shortest_job = self.queue[0]
+                # for p in self.queue[1:]:
+                #     # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
+                #     if p.getBurstTime() < shortest_job.getBurstTime():
+                #         shortest_job = p
                 
                 index = self.queue.index(shortest_job)
                 self.queue.pop(index)
@@ -58,10 +59,22 @@ class Queue(OsObj):
                 for p in self.queue[index:]:
                     p.moveRight(self.cellWidth)     
                 return shortest_job
-                
             else:
                 for p in self.queue:
                     p.moveRight(self.cellWidth)
             return self.queue.pop(0)
+        except IndexError:
+            return None
+
+
+    def getShortestJob(self):
+        """finds shortest Job in queue"""
+        try:
+            shortest_job = self.queue[0]
+            for p in self.queue[1:]:
+                # print("P burst time:",p.getBurstTime(), "        SJ burst time:", shortest_job.getBurstTime())
+                if p.getBurstTime() < shortest_job.getBurstTime():
+                    shortest_job = p   
+            return shortest_job
         except IndexError:
             return None
