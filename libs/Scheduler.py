@@ -270,10 +270,12 @@ class Scheduler:
         return total
 
     def createText(self,words, font, colour):
+        """create text"""
         text = font.render(words, True, colour)
         return text, text.get_rect()
 
     def createButton(self, words, box, font,color, color2, size):
+        """create buttons for input"""
         mouse_pos = pygame.mouse.get_pos()
         clicked = pygame.mouse.get_pressed()
         event = False

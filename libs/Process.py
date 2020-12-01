@@ -9,11 +9,12 @@ class Process(OsObj):
 
         self.id = ID
         self.burstTime = burstTime
+        self.plabeblColor = (0,0,0) #black
 
         self.setTopLeft(70, 40)
         self.stepSize = 30
         self.inCPU = False
-        self.label = self.font.render("P" + str(self.id), True, self.txtColor)
+        self.label = self.font.render("P" + str(self.id), True, self.plabeblColor)
     
     def getBurstTime(self):
         """returns the burst time of a process"""

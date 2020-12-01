@@ -1,5 +1,6 @@
 import sys
 import pygame
+import time
 
 from libs.menu import menu
 
@@ -65,5 +66,6 @@ if __name__ == '__main__':
             algorithms[btn].run(speed,mode)
             algorithms[btn]=al_classes[btn](window, default_processes) #reinitialize algorithm so if chosen again
                                                                        #it starts fresh
+            time.sleep(3)
         closeGameonQuit()  # exit on click the quit button
     # pygame.quit()
