@@ -216,7 +216,7 @@ class Scheduler:
 
         #display the words in the rectangles
         options_font = pygame.font.Font(None,24)
-        speedbtn=self.createButton("SPEEDx" + str(self.speed), options_box2, options_font,\
+        speedbtn=self.createButton("SPEEDx" + str(round(0.15/self.speed,2)), options_box2, options_font,\
             self.hover_color,self.options_color, 3)
         
         pausebtn=self.createButton(self.playbtntext, options_box3, options_font,\
@@ -306,6 +306,8 @@ class Scheduler:
                     self.input2 = True
                 else:
                     self.input2 = False
+                
+                time.sleep(0.1)
 
             if event.type == pygame.KEYDOWN:
                 if self.input:
@@ -315,7 +317,6 @@ class Scheduler:
 
                 if self.input2:
                     if event.key == pygame.K_BACKSPACE:
-                        self.input_text2 = self.input_text[:-1]
+                        self.input_text2 = self.input_text2[:-1]
                     self.input_text2+=event.unicode
-        
         time.sleep(0.05)

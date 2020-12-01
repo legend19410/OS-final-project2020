@@ -83,7 +83,7 @@ class SRT(Scheduler):
             self.processList.remove(self.CPU.getProcess())
             self.nextProcess -= 1
             self.CPU.setProcess(None)
-            # self.finishedProcesses += 1
+            self.finishedProcesses += 1
             self.state = "dequeue"
         
     
