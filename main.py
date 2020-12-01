@@ -45,8 +45,8 @@ if __name__ == '__main__':
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     window.fill((255, 255, 255))
 
-    default_processes = [(1, 3, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
-            (5, 15, 15), (6, 20, 28), (7, 25, 30)]
+    default_processes = [(1, 7, 2), (2, 5, 7), (3, 7, 10), (4, 10, 23), \
+            (5, 15, 15), (6, 20, 28), (7, 25, 12)]
 
     fcfs = FCFS(window, default_processes)
     rr = RR(window, default_processes)
