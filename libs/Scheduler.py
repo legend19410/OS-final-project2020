@@ -171,7 +171,11 @@ class Scheduler:
 
     def displayTTWT(self):
         """displays turnaround time and waiting time on the screen"""
-        t = "TTA Time: " + str(self.TT) + " ms"
+        if self.numProcesses == self.finishedProcesses:
+            self.TT = round(self.TT/self.numProcesses,2)
+            t = "ATA Time: " + str(self.TT) + " ms"
+        else:
+            t = "TTA Time: " + str(self.TT) + " ms"
         t = pygame.font.SysFont(None, 30).render(t, True, (0,0,255))
         width, height = self.window.get_size()
         x = width - t.get_width() - 10
@@ -185,6 +189,8 @@ class Scheduler:
             x = width - t.get_width() - 10
             y = height - t.get_height() - 80
             self.window.blit(t, (x, y))
+        
+
 
         if (self.mode == "step"):
             t = "Mode: " + self.mode

@@ -8,7 +8,7 @@ class Table(OsObj):
         self.table = processTable
         self.colWidth = 160
         self.rowHeight = 22
-        self.font = pygame.font.Font(None, 19)
+        self.font = pygame.font.Font(None, 20)
     
 
     def updateProcessTable(self,new_proc):

@@ -9,20 +9,25 @@ class FCFS(Scheduler):
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
+        if self.queue.isSpaceAvailable() or self.queue.getLen()<7:
+            p = self.processList[self.nextProcess]
+            back = self.queue.getEndPtr()
+            if (p.frontX() < back):
+                dist = back - p.frontX()
+                if (dist > p.stepSize):
+                    p.moveRight()
+                else:
+                    p.moveRight(dist)
+                    self.queue.enqueue(p)
+                    self.nextProcess += 1
+                    if (self.nextProcess == len(self.processList)):
+                        self.state = "dequeue"
+        elif self.CPU.lock:
+            self.state = "execute"
+        else:
+            self.state = "dequeue"
 
-        p = self.processList[self.nextProcess]
-        back = self.queue.getEndPtr()
-        if (p.frontX() < back):
-            dist = back - p.frontX()
-            if (dist > p.stepSize):
-                p.moveRight()
-            else:
-                p.moveRight(dist)
-                self.queue.enqueue(p)
-                self.nextProcess += 1
-                if (self.nextProcess == len(self.processList)):
-                    self.state = "dequeue"
-
+            
     def execute(self):
         """ Executes the current process to completion before removing
             the process from the cpu and releasing the lock """

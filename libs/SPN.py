@@ -11,22 +11,26 @@ class SPN(Scheduler):
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
-
-        if (self.nextProcess == len(self.processList)):
-            self.state = "dequeue"
+        if self.queue.isSpaceAvailable() or self.queue.getLen()<7:
+            if (self.nextProcess == len(self.processList)):
+                self.state = "dequeue"
+            else:
+                p = self.processList[self.nextProcess]
+                back = self.queue.getEndPtr()
+                if (p.frontX() < back):
+                    dist = back - p.frontX()
+                    if (dist > p.stepSize):
+                        p.moveRight()
+                    else:
+                        p.moveRight(dist)
+                        self.queue.enqueue(p)
+                        self.nextProcess += 1
+                        self.newProcess = p
+                        self.state = "dequeue"
+        elif self.CPU.lock:
+            self.state = "execute"
         else:
-            p = self.processList[self.nextProcess]
-            back = self.queue.getEndPtr()
-            if (p.frontX() < back):
-                dist = back - p.frontX()
-                if (dist > p.stepSize):
-                    p.moveRight()
-                else:
-                    p.moveRight(dist)
-                    self.queue.enqueue(p)
-                    self.nextProcess += 1
-                    self.newProcess = p
-                    self.state = "dequeue"
+            self.state = "dequeue"
 
     def dequeue(self):
         """ Removes a process from the queue and adds it to the CPU for execution """
