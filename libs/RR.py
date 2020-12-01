@@ -17,7 +17,6 @@ class RR(Scheduler):
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
-        
         if self.queue.isSpaceAvailable():
             p = self.processList[self.nextProcess]
             back = self.queue.getEndPtr()
@@ -31,13 +30,6 @@ class RR(Scheduler):
                     self.nextProcess += 1
                     if (self.nextProcess == len(self.processList)):
                         self.state = "dequeue"
-                    # else:
-                    #     if not self.queue.isSpaceAvailable():
-                    #         self.state = "dequeue"
-                    #     else:
-                    #         print("Queue lenght:", self.queue.getLen())
-                    #         self.state = "enqueue"
-            # self.newlyadded-=1
         elif self.CPU.lock:
             self.state = "execute"
         else:

@@ -67,7 +67,7 @@ class Scheduler:
         # Run until all processes have been executed
         
         while (self.finishedProcesses < self.numProcesses):
-            print(self.finishedProcesses, self.numProcesses)
+            # print(self.finishedProcesses, self.numProcesses)
             if not self.clock.getMode()=="paused":
                 self.stepModeWait()
                 self.STATE_DICT[self.state]()
@@ -86,6 +86,12 @@ class Scheduler:
             self.processList.extend(new)
             self.state = "enqueue"
         except KeyError:
+            # wait_queue_size = len(self.processesList) - self.finishedProcesses
+            wait_queue = self.processList[self.queue.getLen()+1:]
+            wait_queue_size = self.finishedProcesses - self.numProcesses
+            if (self.queue.isSpaceAvailable() and wait_queue):
+                self.state = "enqueue"
+                return 1
             return 0
 
     def waiting(self):
@@ -249,7 +255,7 @@ class Scheduler:
                             self.processes[arrive_time] = [new]
 
                         self.numProcesses = self.calculateNumProcesses()
-                        print(self.numProcesses)
+                        # print(self.numProcesses)
                         self.table.updateProcessTable((self.lpid,arrive_time, burst_time))
                         self.lpid+=1
                         self.input_text = ""

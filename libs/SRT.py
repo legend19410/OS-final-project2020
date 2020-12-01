@@ -18,18 +18,23 @@ class SRT(Scheduler):
         """ Adds a newly spaawned process to the queue """
 
         # print ("Next process:",self.nextProcess, "Len proc List:",len(self.processList))
-        p = self.processList[self.nextProcess]
-        back = self.queue.getEndPtr()
-        if (p.frontX() < back):
-            dist = back - p.frontX()
-            if (dist > p.stepSize):
-                p.moveRight()
-            else:
-                p.moveRight(dist)
-                self.queue.enqueue(p)
-                self.nextProcess += 1
-                if (self.nextProcess == len(self.processList)):
-                    self.state = "dequeue"
+        if self.queue.isSpaceAvailable():
+            p = self.processList[self.nextProcess]
+            back = self.queue.getEndPtr()
+            if (p.frontX() < back):
+                dist = back - p.frontX()
+                if (dist > p.stepSize):
+                    p.moveRight()
+                else:
+                    p.moveRight(dist)
+                    self.queue.enqueue(p)
+                    self.nextProcess += 1
+                    if (self.nextProcess == len(self.processList)):
+                        self.state = "dequeue"
+        elif self.CPU.lock:
+            self.state = "execute"
+        else:
+            self.state = "dequeue"
 
 
     def dequeue(self):

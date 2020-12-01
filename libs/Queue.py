@@ -53,12 +53,13 @@ class Queue(OsObj):
             if al=="spn" or al=="srt":
                 shortest_job = self.getShortestJob()
                 
-                index = self.queue.index(shortest_job)
-                self.queue.pop(index)
-                
-                for p in self.queue[index:]:
-                    p.moveRight(self.cellWidth)     
-                return shortest_job
+                if(shortest_job):
+                    index = self.queue.index(shortest_job)
+                    self.queue.pop(index)
+                    
+                    for p in self.queue[index:]:
+                        p.moveRight(self.cellWidth)     
+                    return shortest_job
             else:
                 for p in self.queue:
                     p.moveRight(self.cellWidth)
