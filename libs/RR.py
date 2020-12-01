@@ -59,7 +59,7 @@ class RR(Scheduler):
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
                     self.TT += self.clock.getTime() - p.getArrivalTime()
-                    # print()
+            
                 p = self.queue.dequeue(self.window)
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"

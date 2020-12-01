@@ -94,12 +94,9 @@ class SRT(Scheduler):
         shortest_job = self.queue.getShortestJob()
         cpu_proc = self.CPU.getProcess()
         if (shortest_job and cpu_proc):
-            # print("sj",shortest_job.getBurstTime(),"cpuj", cpu_proc.getBurstTime())
             if shortest_job.getBurstTime() < cpu_proc.getBurstTime():
                 return True
         return False
-        # # self.state = "requeue"
-        # return False
 
 
     def requeue(self):
@@ -143,6 +140,4 @@ class SRT(Scheduler):
                 self.CPU.lock = False
                 self.movingRight = False
                 self.movingUp = False                
-                # if (self.spawnProcess() == 0):
-                #     self.state = "dequeue"
                 self.state = "dequeue"

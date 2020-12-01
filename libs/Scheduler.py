@@ -173,7 +173,7 @@ class Scheduler:
         """displays turnaround time and waiting time on the screen"""
         if self.numProcesses == self.finishedProcesses:
             self.TT = round(self.TT/self.numProcesses,2)
-            t = "ATA Time: " + str(self.TT) + " ms"
+            t = "Avg. TA Time: " + str(self.TT) + " ms"
         else:
             t = "TTA Time: " + str(self.TT) + " ms"
         t = pygame.font.SysFont(None, 30).render(t, True, (0,0,255))
@@ -200,11 +200,8 @@ class Scheduler:
 
     def generateControlButtons(self):
         options_box1 = pygame.Rect((50, self.SCREEN_HEIGHT-230), (180, 30))
-        # options_box1.center = ((self.SCREEN_WIDTH/2),(self.SCREEN_HEIGHT/4))
         options_box2 = pygame.Rect((5, self.SCREEN_HEIGHT-30), (102, 30))
-        # options_box2.center = ((self.SCREEN_WIDTH/2),(options_box1.bottom+40))
         options_box3 = pygame.Rect((options_box2.right+20, self.SCREEN_HEIGHT-30), (100, 30))
-        # options_box3.center = ((self.SCREEN_WIDTH/2),(options_box2.bottom+40))
         self.options_box4 = pygame.Rect((options_box3.left+20,options_box3.top-250), (80, 30))
         self.options_box5 = pygame.Rect((self.options_box4.left-90,self.options_box4.top), (80, 30))
 
@@ -220,7 +217,6 @@ class Scheduler:
 
         pygame.draw.rect(self.window, self.box4_color, self.options_box4,1)
         pygame.draw.rect(self.window, self.box5_color, self.options_box5,1)
-        # options_box4.center = ((self.SCREEN_WIDTH/2),(options_box3.bottom+40))
         text = self.input_font.render(self.input_text, True, (0,0,0))
         self.window.blit(text, (self.options_box4.left+5,self.options_box4.top+5))
 
@@ -240,10 +236,6 @@ class Scheduler:
         ihf2 = pygame.font.Font('freesansbold.ttf',23)
         ih2 = ihf2.render("Add Processes", True, (0,0,255))
         self.window.blit(ih2, (self.options_box5.left,self.options_box4.top-50) )
-    
-        # self.options_box4.width = max(2, text.get_width()+5)
-
-        # print(options_box1.right)
         
 
         #display the words in the rectangles
@@ -277,7 +269,7 @@ class Scheduler:
             try:
                 arrive_time = int(self.input_text2)
                 burst_time = int(self.input_text)
-                # arrive_time = self.clock.getTime()+1
+               
                 if(arrive_time and burst_time):
                     if arrive_time > self.clock.getTime():
                         new = Process(self.lpid, burst_time,arrive_time)
@@ -287,7 +279,6 @@ class Scheduler:
                             self.processes[arrive_time] = [new]
 
                         self.numProcesses = self.calculateNumProcesses()
-                        # print(self.numProcesses)
                         self.table.updateProcessTable((self.lpid,arrive_time, burst_time))
                         self.lpid+=1
                         self.input_text = ""
