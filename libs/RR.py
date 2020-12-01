@@ -20,6 +20,9 @@ class RR(Scheduler):
         """sets the time quantum for round robin"""
         self.TIME_QUANTUM = num
 
+    def getTimeQuantum(self):
+        return self.TIME_QUANTUM
+
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
         if self.queue.isSpaceAvailable():

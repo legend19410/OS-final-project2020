@@ -10,7 +10,7 @@ from libs.Clock import Clock
 class Scheduler:
     def __init__(self, window,processes):
         # Dictionary of processes indexed on arrival time
-        self.algorithm=None
+        self.algorithm=""
         self.options_color = (0,0,255)       #blue
         self.hover_color = (0,255,00)
         self.heading_font = pygame.font.Font('freesansbold.ttf',25)
@@ -177,6 +177,14 @@ class Scheduler:
         x = width - t.get_width() - 10
         y = height - t.get_height() - 40
         self.window.blit(t, (x, y))
+
+        if self.algorithm == "rr":
+            t = "Time Quantum: " + str(self.TIME_QUANTUM) + " ms"
+            t = pygame.font.SysFont(None, 30).render(t, True, (0,0,255))
+            width, height = self.window.get_size()
+            x = width - t.get_width() - 10
+            y = height - t.get_height() - 80
+            self.window.blit(t, (x, y))
 
         if (self.mode == "step"):
             t = "Mode: " + self.mode
