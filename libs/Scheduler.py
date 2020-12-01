@@ -18,7 +18,7 @@ class Scheduler:
         self.window = window
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = pygame.display.get_window_size()
         self.speed=0.15
-        self.speeds = [0.5, 0.25, 0.15, 0.1, 0.05, 0.01]
+        self.speeds = [0.25, 0.15, 0.1, 0.05, 0.01]
         self.input_text = ""
         self.input_text2 = ""
         self.options_box4 = None
