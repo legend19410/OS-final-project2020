@@ -2,7 +2,7 @@
 
 ## Group Members
 
-Milton Francis
-Jason Hunter
-Malik Edwards
-Javier Bryan
+1. Milton Francis
+2. Jason Hunter
+3. Malik Edwards
+4. Javier Bryan
