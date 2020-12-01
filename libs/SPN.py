@@ -43,6 +43,7 @@ class SPN(Scheduler):
                     self.processList.remove(self.CPU.getProcess())
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
+                    self.TT += self.clock.getTime() - p.getArrivalTime()
                 p = self.queue.dequeue(self.window, "spn")
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
@@ -69,6 +70,7 @@ class SPN(Scheduler):
             self.clock.increment()
             self.spawnProcess()
         else:
+            self.TT += self.clock.getTime() - (self.CPU.getProcess()).getArrivalTime()
             self.processList.remove(self.CPU.getProcess())
             self.nextProcess -= 1
             self.CPU.setProcess(None)

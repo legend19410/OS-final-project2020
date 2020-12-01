@@ -10,6 +10,7 @@ from libs.Clock import Clock
 class Scheduler:
     def __init__(self, window,processes):
         # Dictionary of processes indexed on arrival time
+        self.algorithm=None
         self.options_color = (0,0,255)       #blue
         self.hover_color = (0,255,00)
         self.heading_font = pygame.font.Font('freesansbold.ttf',25)
@@ -28,10 +29,11 @@ class Scheduler:
         self.input=False
         self.input2=False
         self.lpid = processes[-1][0]+1
+        self.TT=0
 
         self.processes = {}
         for id, arrivalTime, burstTime in processes:
-            proc = Process(id, burstTime)
+            proc = Process(id, burstTime, arrivalTime)
             try:
                 self.processes[arrivalTime].append(proc)
             except KeyError:
@@ -113,6 +115,7 @@ class Scheduler:
                     self.processList.remove(self.CPU.getProcess())
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
+                    self.TT += self.clock.getTime() - p.getArrivalTime()
                 p = self.queue.dequeue(self.window)
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
@@ -138,6 +141,7 @@ class Scheduler:
         self.table.draw(self.window)
         self.queue.draw(self.window)
         self.clock.draw(self.window)
+        self.displayTTWT()
         self.generateControlButtons()
         for p in self.processList:
             p.draw(self.window)
@@ -165,6 +169,20 @@ class Scheduler:
         msg += "Current State: " + self.state
         raise Exception(msg)
 
+    def displayTTWT(self):
+        """displays turnaround time and waiting time on the screen"""
+        t = "TTA Time: " + str(self.TT) + " ms"
+        t = pygame.font.SysFont(None, 30).render(t, True, (0,0,255))
+        width, height = self.window.get_size()
+        x = width - t.get_width() - 10
+        y = height - t.get_height() - 40
+        self.window.blit(t, (x, y))
+
+        if (self.mode == "step"):
+            t = "Mode: " + self.mode
+            t = self.font.render(t, True, self.txtColor)
+            y -= (t.get_height() + 10)
+            self.window.blit(t, (x, y))
 
     def generateControlButtons(self):
         options_box1 = pygame.Rect((50, self.SCREEN_HEIGHT-230), (180, 30))
@@ -222,7 +240,7 @@ class Scheduler:
         pausebtn=self.createButton(self.playbtntext, options_box3, options_font,\
         self.hover_color,self.options_color, 3)
 
-        okbtn=self.createButton("OK", options_box1, options_font,\
+        okbtn=self.createButton("ADD", options_box1, options_font,\
         self.hover_color,self.options_color, 3)        
         
         if (speedbtn):     #if speed button is pressed
@@ -248,7 +266,7 @@ class Scheduler:
                 # arrive_time = self.clock.getTime()+1
                 if(arrive_time and burst_time):
                     if arrive_time > self.clock.getTime():
-                        new = Process(self.lpid, burst_time)
+                        new = Process(self.lpid, burst_time,arrive_time)
                         try:
                             self.processes[arrive_time].append(new)
                         except KeyError:

@@ -4,6 +4,7 @@ class RR(Scheduler):
     def __init__(self, window, processes=[(1,5,33), (2,2,32), \
             (3,3,44), (4,9,27), (5,10,58), (6,20,34), (7,30, 80)]):
         super().__init__(window, processes)
+        self.algorithm = "rr"
         self.TIME_QUANTUM = 15
         self.timeBeforeInterrupt = self.TIME_QUANTUM
         self.STATE_DICT.update({"enqueue": self.enqueue, \
@@ -14,6 +15,10 @@ class RR(Scheduler):
         # Atributes to save the stte of the requeue operation
         self.movingUp = False
         self.movingRight = False
+    
+    def setTimeQuantum(self, num):
+        """sets the time quantum for round robin"""
+        self.TIME_QUANTUM = num
 
     def enqueue(self):
         """ Adds a newly spaawned process to the queue """
@@ -50,6 +55,8 @@ class RR(Scheduler):
                     self.processList.remove(self.CPU.getProcess())
                     self.nextProcess -= 1
                     self.finishedProcesses += 1
+                    self.TT += self.clock.getTime() - p.getArrivalTime()
+                    # print()
                 p = self.queue.dequeue(self.window)
                 if (p == None):     # Returns to waiting state if queue is empty
                     self.state = "waiting"
@@ -72,6 +79,7 @@ class RR(Scheduler):
             execution if the time slice has been exhausted """
 
         if (not self.CPU.lock):                 # The process finished before the time slice
+            self.TT += self.clock.getTime() - (self.CPU.getProcess()).getArrivalTime()
             self.processList.remove(self.CPU.getProcess())
             self.nextProcess -= 1
             self.CPU.setProcess(None)

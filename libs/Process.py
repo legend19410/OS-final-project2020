@@ -2,13 +2,14 @@ import pygame
 from libs.OsObj import OsObj
 
 class Process(OsObj):
-    def __init__(self, ID, burstTime):
+    def __init__(self, ID, burstTime, arrivalTime):
         img = pygame.image.load("resources/images/exe.png")
         img = pygame.transform.scale(img, (60, 60))
         super().__init__(img, pygame.font.SysFont(None,30))
 
         self.id = ID
         self.burstTime = burstTime
+        self.arrivalTime = arrivalTime
         self.plabeblColor = (0,0,0) #black
 
         self.setTopLeft(70, 40)
@@ -19,7 +20,11 @@ class Process(OsObj):
     def getBurstTime(self):
         """returns the burst time of a process"""
         return self.burstTime
-    
+
+    def getArrivalTime(self):
+        """return arrival time of process"""
+        return self.arrivalTime
+
     def getID(self):
         """returns the id of a process"""
         return self.id
