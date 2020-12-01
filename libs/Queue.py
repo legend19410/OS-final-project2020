@@ -26,7 +26,7 @@ class Queue(OsObj):
                 (self.backX() + (self.cellWidth*i), self.topY()+self.height()))
 
         # Draw label 'Queue' at the top of the queue
-        txt = self.font.render("Queue", True, self.txtColor)
+        txt = self.font.render("Main Memory", True, self.txtColor)
         window.blit(txt, self.computeTopLeft(self.center(), txt.get_size(), \
             0, -self.height()//2 - 10))
 

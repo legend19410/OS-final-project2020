@@ -14,6 +14,9 @@ class Table(OsObj):
     def updateProcessTable(self,new_proc):
         """Updates Process Table with recently added process"""
         self.table.append(new_proc)
+        tl = len(self.table)
+        if tl > 14:
+            self.table = self.table[tl-14:]
 
     def draw(self, window):
         """ Draw the process table with the info given onto the screen """
@@ -35,7 +38,7 @@ class Table(OsObj):
 
         # Draw the lines that separate the rows
         t = self.height() // self.rowHeight
-        for i in range(1, t + 1):
+        for i in range(1, t):
             pygame.draw.line(window, self.bgColor, \
                 (self.backX(), self.topY() + (self.rowHeight*i)), \
                 (self.backX() + self.width(), self.topY() + (self.rowHeight*i)))
